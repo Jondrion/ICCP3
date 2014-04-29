@@ -16,6 +16,8 @@ program Boltz
   allocate(gridarray(n_x,n_y,gridtype))
   print *,'grid dimensions: ', SIZE(gridarray,1), SIZE(gridarray,2), SIZE(gridarray,3)
   
+ ! call timestep(gridarray, n_x, n_y)
+
 end program
 
 
