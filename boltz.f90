@@ -13,7 +13,7 @@ program Boltz
   n_y = int(tubewidth/(gridsize*SQRT(3._8)/2._8))+1
   n_x = int(tubelength/gridsize)+1
 
-  allocate(gridarray(n_x,n_y,gridtype))
+  allocate(gridarray(n_y,n_x,gridtype))
   print *,'grid dimensions: ', SIZE(gridarray,1), SIZE(gridarray,2), SIZE(gridarray,3)
   
  ! call timestep(gridarray, n_x, n_y)
