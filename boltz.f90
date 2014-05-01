@@ -21,13 +21,18 @@ program Boltz
 
     gridarray=0
 
-    gridarray(3,3,1:7)=1
+    gridarray(3,2,1:7)=1
+    gridarray(2,5,1:7)=1
 
     call disp(sum(gridarray,3))
 
-    call timestep(gridarray, n_x, n_y, pressure_grad)
+    call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime)
 
-    print *,"after timestep"
+    print *,"after timestep 1"
+    call disp(sum(gridarray,3))
+
+    call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime)
+    print *,"after timestep 2"
     call disp(sum(gridarray,3))
 
 end program

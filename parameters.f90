@@ -1,6 +1,6 @@
-subroutine parameters(lsize, relaxtime, tubewidth, tubelength, gridsize, gridtype)
+subroutine parameters(relaxtime, tubewidth, tubelength, gridsize, gridtype, pressure)
 
-  real(8), intent(out) :: lsize, relaxtime, tubewidth, tubelength, gridsize
+  real(8), intent(out) :: relaxtime, tubewidth, tubelength, gridsize, pressure
   integer, intent(out) :: gridtype
   open(10,file="parameters.txt")
   read(10,*) relaxtime

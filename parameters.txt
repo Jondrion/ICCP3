@@ -3,4 +3,4 @@
 10 tubelength
 2 gridsize
 7 gridtype
-10 pressure
+1.0 pressure

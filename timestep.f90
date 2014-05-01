@@ -1,8 +1,8 @@
-subroutine timestep(dataarray, x, y, pressure_grad)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime)
     
     use dispmodule
     integer, intent(in) :: x,y
-    real(8), intent(in) :: pressure_grad
+    real(8), intent(in) :: pressure_grad, relaxtime
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7)
@@ -19,6 +19,8 @@ subroutine timestep(dataarray, x, y, pressure_grad)
 
     call calculate_equildensity(equildensity,velocities, x, y)
 
+    !call relax_density(dataarray,equildensity,x,y,relaxtime)
+
 
 contains
 
@@ -28,10 +30,14 @@ contains
         real(8) :: temparray(y,x,7)
         integer :: i,j,k
 
-        do i=2, x-1
-            do j=2,y-1
+        temparray=0
+
+        do j=1, x
+            do i=1,y
                 do k=1,7
-                    if (mod(i,2)==0) then
+                    if (dataarray(i,j,k)==0) then
+                        !- do nothing, you are probably at a boundary
+                    else if (mod(i,2)==0) then
                         if (k==1) then
                             temparray(i,j,k)=dataarray(i,j,k)
                         else if (k==2) then
@@ -155,7 +161,7 @@ contains
 
         direction1D=[1._8,COS(Pi/3),COS(2*Pi/3),-1._8,COS(4*Pi/3),COS(5*Pi/3), &
              0._8,SIN(Pi/3),SIN(2*Pi/3),0._8,SIN(4*Pi/3),SIN(5*Pi/3)]
-        direction=reshape(direction1D,[6,2])        
+        direction=reshape(direction1D,[6,2])      
 
         do i=1,x
             do j=1,y
@@ -172,6 +178,15 @@ contains
         end do        
     
     end subroutine calculate_equildensity
+
+    subroutine relax_density(dataarray,equildensity,x,y,relaxtime)
+        integer, intent(in) :: x,y
+        real(8), intent(in) :: relaxtime, equildensity(y,x,7)
+        real(8), intent(inout) :: dataarray(y,x,7)
+
+        dataarray(:,:,:) = (1._8-1._8/relaxtime)*dataarray(:,:,:)+(1._8/relaxtime)*equildensity(:,:,:)
+        
+    end subroutine relax_density
 
 
 end subroutine timestep
