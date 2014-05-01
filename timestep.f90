@@ -26,8 +26,10 @@ contains
         real(8) :: temparray(y,x,7)
         integer :: i,j,k
 
-        do i=2, x-1
-            do j=2,y-1
+        temparray=0
+
+        do j=2, x-1
+            do i=2,y-1
                 do k=1,7
                     if (mod(i,2)==0) then
                         if (k==1) then
@@ -121,9 +123,9 @@ contains
         do i=1,x
             do j=1,y
                 velocities(j,i,1)=(dataarray(j,i,2)+dataarray(j,i,3)*COS(Pi/3)+dataarray(j,i,4)*COS(2*Pi/3)-dataarray(j,i,5) &
-                    -dataarray(j,i,6)*COS(Pi/3)-dataarray(j,i,7)*COS(2*Pi/3))/(sum(dataarray(j,i,:)))
-                velocities(j,i,2)=(dataarray(j,i,2)+dataarray(j,i,3)*SIN(Pi/3)+dataarray(j,i,4)*SIN(2*Pi/3)-dataarray(j,i,5) &
-                    -dataarray(j,i,6)*SIN(Pi/3)-dataarray(y,x,7)*SIN(2*Pi/3))/(sum(dataarray(j,i,:)))                
+                    -dataarray(j,i,6)*COS(Pi/3)-dataarray(j,i,7)*COS(2*Pi/3))
+                velocities(j,i,2)=(-dataarray(j,i,3)*SIN(Pi/3)-dataarray(j,i,4)*SIN(2*Pi/3) &
+                    -dataarray(j,i,6)*SIN(4*Pi/3)-dataarray(j,i,7)*SIN(5*Pi/3))              
             end do
         end do
 
@@ -131,7 +133,7 @@ contains
 
     subroutine calculate_equildensity(equildensity, velocities,x,y)
 
-        
+        use dispmodule
         integer, intent(in) :: x,y
         real(8),  intent(in) :: velocities(y,x,2)
         real(8),  intent(out) :: equildensity(y,x,7)
@@ -142,21 +144,23 @@ contains
 
         direction1D=[1._8,COS(Pi/3),COS(2*Pi/3),-1._8,COS(4*Pi/3),COS(5*Pi/3), &
              0._8,SIN(Pi/3),SIN(2*Pi/3),0._8,SIN(4*Pi/3),SIN(5*Pi/3)]
-        direction=reshape(direction1D,[6,2])        
+        direction=reshape(direction1D,[6,2])
 
-        do i=1,x
+        equildensity=0
+
+         do i=1,x
             do j=1,y
                 do k=1,7
                     if (k==1) then
-                        equildensity(j,i,k)=1/2*(1-2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)))
+                        equildensity(j,i,k)=1._8/2*(1-2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)))                        
                     else
-                        equildensity(j,i,k)=1/12*(1+4*dot_product(velocities(j,i,1:2),direction(k-1,1:2)) &
+                        equildensity(j,i,k)=1._8/12*(1+4*dot_product(velocities(j,i,1:2),direction(k-1,1:2)) &
                             -2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)) &
                                 +8*dot_product(velocities(j,i,1:2),direction(k-1,1:2))**2)
                     end if
                 end do
             end do
-        end do        
+        end do
     
     end subroutine calculate_equildensity
 
