@@ -1,8 +1,8 @@
-subroutine timestep(dataarray, x, y)
-
+subroutine timestep(dataarray, x, y, pressure_grad)
     
     use dispmodule
     integer, intent(in) :: x,y
+    real(8), intent(in) :: pressure_grad
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7)
@@ -14,6 +14,8 @@ subroutine timestep(dataarray, x, y)
     call reverse_bnd_vel(dataarray,x,y)
 
     call calculate_vel(velocities, dataarray, x, y)
+
+    call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
     call calculate_equildensity(equildensity,velocities, x, y)
 
@@ -110,16 +112,13 @@ contains
     end subroutine reverse_bnd_vel
 
     subroutine calculate_vel(velocities,dataarray,x,y)
-        
-        
         integer, intent(in) :: x, y
         real(8), intent(in) :: dataarray(y,x,7)
         real(8), intent(out) :: velocities(y,x,2)
         real(8), parameter :: Pi=4*atan(1d0)
         
         integer :: i,j
-        
-        
+
         do i=1,x
             do j=1,y
                 velocities(j,i,1)=(dataarray(j,i,2)+dataarray(j,i,3)*COS(Pi/3)+dataarray(j,i,4)*COS(2*Pi/3)-dataarray(j,i,5) &
@@ -130,6 +129,20 @@ contains
         end do
 
     end subroutine calculate_vel
+
+    subroutine add_pressure(dataarray,velocities,x,y,pressure_grad)
+        integer, intent(in) :: x,y
+        real(8), intent(in) :: pressure_grad, dataarray(y,x,7)
+        real(8), intent(inout) :: velocities(y,x,2)
+        integer :: i,j
+
+        do i=2,x-1
+            do j=2,y-1
+                velocities(j,i,1)=velocities(j,i,1) + pressure_grad/sum(dataarray(j,i,:))
+            end do
+        end do
+
+    end subroutine add_pressure
 
     subroutine calculate_equildensity(equildensity, velocities,x,y)
 
