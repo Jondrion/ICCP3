@@ -94,10 +94,10 @@ contains
             end do
         end do
 
-    end subroutine
+    end subroutine reverse_bnd_vel
 
     subroutine calculate_vel(velocities,dataarray,x,y)
-        real(8), intent(inout) :: dataarray(y,x,7)
+        real(8), intent(in) :: dataarray(y,x,7)
         real(8), intent(out) :: velocities(y,x,2)
         integer, intent(in) :: x, y
         integer :: i,j
@@ -108,6 +108,21 @@ contains
                 velocities(y,x,2)=(dataarray(y,x,2)+dataarray(y,x,3)*SIND(60)+dataarray(y,x,4)*SIND(120)-dataarray(y,x,5)-dataarray(y,x,6)*SIND(60)-dataarray(y,x,7)*SIND(120))/(sum(dataarray, dim=3))
             end do
         end do
+
+    end subroutine calculate_vel
+
+    subroutine calculate_meandensity(meandensity,dataarray, velocities,x,y)
+        real(8) :: intent(in) :: velocities(y,x,2), dataarray(y,x,7)
+        real(8) :: intent(out) :: meandensity(y,x,7)
+        integer, intent(in) :: x,y
+        integer:: i
+
+        do i=1,7
+            if (i==1) then
+                meandensity=1/2*(1+4*)
+
+    end subroutine calculate_meandensity
+
 
 end subroutine timestep
 
