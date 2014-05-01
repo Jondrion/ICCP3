@@ -1,11 +1,16 @@
-subroutine timestep(dataarray, x, y)
+subroutine timestep(dataarray, x, y, pressure_grad)
     integer, intent(in) :: x,y
+    real(8), intent(in) :: pressure_grad
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8) velocities(y,x,2)
 
     call movedensity(dataarray,x,y)
 
     call reverse_bnd_vel(dataarray,x,y)
+
+    call calculate_vel(velocities,dataarray,x,y)
+
+    call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
 
 contains
@@ -61,9 +66,9 @@ contains
     end subroutine movedensity
 
     subroutine reverse_bnd_vel(dataarray, x, y)
+        integer, intent(in) :: x, y
         real(8), intent(inout) :: dataarray(y,x,7)
         real(8) :: tempval
-        integer, intent(in) :: x, y
         integer :: i,k
 
         do i=1,x
@@ -97,25 +102,41 @@ contains
     end subroutine reverse_bnd_vel
 
     subroutine calculate_vel(velocities,dataarray,x,y)
+        integer, intent(in) :: x, y
         real(8), intent(in) :: dataarray(y,x,7)
         real(8), intent(out) :: velocities(y,x,2)
-        integer, intent(in) :: x, y
         integer :: i,j
 
         do i=1,x
             do j=1,y
-                velocities(y,x,1)=(dataarray(y,x,2)+dataarray(y,x,3)*COSD(60)+dataarray(y,x,4)*COSD(120)-dataarray(y,x,5)-dataarray(y,x,6)*COSD(60)-dataarray(y,x,7)*COSD(120))/(sum(dataarray, dim=3))
-                velocities(y,x,2)=(dataarray(y,x,2)+dataarray(y,x,3)*SIND(60)+dataarray(y,x,4)*SIND(120)-dataarray(y,x,5)-dataarray(y,x,6)*SIND(60)-dataarray(y,x,7)*SIND(120))/(sum(dataarray, dim=3))
+                velocities(j,i,1)=(dataarray(j,i,2)+dataarray(j,i,3)*COSD(60)+dataarray(j,i,4)*COSD(120)&
+                    -dataarray(j,i,5)-dataarray(j,i,6)*COSD(60)-dataarray(j,i,7)*COSD(120))/(sum(dataarray, dim=3))
+                velocities(j,i,2)=(dataarray(j,i,2)+dataarray(j,i,3)*SIND(60)+dataarray(j,i,4)*SIND(120)&
+                    -dataarray(j,i,5)-dataarray(j,i,6)*SIND(60)-dataarray(j,i,7)*SIND(120))/(sum(dataarray, dim=3))
             end do
         end do
 
     end subroutine calculate_vel
 
-    subroutine calculate_meandensity(meandensity,dataarray, velocities,x,y)
-        real(8) :: intent(in) :: velocities(y,x,2), dataarray(y,x,7)
-        real(8) :: intent(out) :: meandensity(y,x,7)
+    subroutine add_pressure(dataarray,velocities,x,y,pressure_grad)
         integer, intent(in) :: x,y
-        integer:: i
+        real(8), intent(in) :: pressure_grad, dataarray(y,x,7)
+        real(8), intent(inout) :: velocities(y,x,2)
+        integer :: i,j
+
+        do i=2,x-1
+            do j=2,y-1
+                velocities(j,i,1)=velocities(j,i,1) + pressure_grad/sum(dataarray(j,i,:))
+            end do
+        end do
+
+    end subroutine add_pressure
+
+    subroutine calculate_meandensity(meandensity,dataarray, velocities,x,y)
+        integer, intent(in) :: x,y
+        real(8), intent(in) :: velocities(y,x,2), dataarray(y,x,7)
+        real(8), intent(out) :: meandensity(y,x,7)
+        integer :: i
 
         do i=1,7
             if (i==1) then

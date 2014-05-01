@@ -3,12 +3,13 @@ program Boltz
     use dispmodule
 
     implicit none
-    real(8) :: lsize, relaxtime, tubewidth, tubelength, gridsize
+    real(8) :: lsize, relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad
     real(8), allocatable :: gridarray(:,:,:)
     integer :: gridtype, n_y, n_x
 
-    call parameters(lsize, relaxtime, tubewidth, tubelength, gridsize, gridtype)
-    print *, "lsize=",lsize, "relaxtime=",relaxtime, "tubewidth", tubewidth, "tubelength", tubelength
+    call parameters(relaxtime, tubewidth, tubelength, gridsize, gridtype, pressure)
+    pressure_grad = pressure/tubelength
+    print *, "relaxtime=",relaxtime, "tubewidth", tubewidth, "tubelength", tubelength, "pressure", pressure
 
 
 !-- Create the grid array
@@ -24,7 +25,7 @@ program Boltz
 
     call disp(sum(gridarray,3))
 
-    call timestep(gridarray, n_x, n_y)
+    call timestep(gridarray, n_x, n_y, pressure_grad)
 
     print *,"grid"
     call disp(sum(gridarray,3))
