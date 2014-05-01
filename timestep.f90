@@ -1,11 +1,21 @@
 subroutine timestep(dataarray, x, y)
+
+    
+    use dispmodule
     integer, intent(in) :: x,y
     real(8), intent(inout) :: dataarray(y,x,7)
-    real(8) velocities(y,x,2)
+    real(8) :: velocities(y,x,2)
+    real(8) :: equildensity(y,x,7)
+
+    
 
     call movedensity(dataarray,x,y)
-
+    
     call reverse_bnd_vel(dataarray,x,y)
+
+    call calculate_vel(velocities, dataarray, x, y)
+
+    call calculate_equildensity(equildensity,velocities, x, y)
 
 
 contains
@@ -61,9 +71,10 @@ contains
     end subroutine movedensity
 
     subroutine reverse_bnd_vel(dataarray, x, y)
+        integer, intent(in) :: x, y
         real(8), intent(inout) :: dataarray(y,x,7)
         real(8) :: tempval
-        integer, intent(in) :: x, y
+        
         integer :: i,k
 
         do i=1,x
@@ -97,31 +108,57 @@ contains
     end subroutine reverse_bnd_vel
 
     subroutine calculate_vel(velocities,dataarray,x,y)
+        
+        
+        integer, intent(in) :: x, y
         real(8), intent(in) :: dataarray(y,x,7)
         real(8), intent(out) :: velocities(y,x,2)
-        integer, intent(in) :: x, y
+        real(8), parameter :: Pi=4*atan(1d0)
+        
         integer :: i,j
-
+        
+        
         do i=1,x
             do j=1,y
-                velocities(y,x,1)=(dataarray(y,x,2)+dataarray(y,x,3)*COSD(60)+dataarray(y,x,4)*COSD(120)-dataarray(y,x,5)-dataarray(y,x,6)*COSD(60)-dataarray(y,x,7)*COSD(120))/(sum(dataarray, dim=3))
-                velocities(y,x,2)=(dataarray(y,x,2)+dataarray(y,x,3)*SIND(60)+dataarray(y,x,4)*SIND(120)-dataarray(y,x,5)-dataarray(y,x,6)*SIND(60)-dataarray(y,x,7)*SIND(120))/(sum(dataarray, dim=3))
+                velocities(j,i,1)=(dataarray(j,i,2)+dataarray(j,i,3)*COS(Pi/3)+dataarray(j,i,4)*COS(2*Pi/3)-dataarray(j,i,5) &
+                    -dataarray(j,i,6)*COS(Pi/3)-dataarray(j,i,7)*COS(2*Pi/3))/(sum(dataarray(j,i,:)))
+                velocities(j,i,2)=(dataarray(j,i,2)+dataarray(j,i,3)*SIN(Pi/3)+dataarray(j,i,4)*SIN(2*Pi/3)-dataarray(j,i,5) &
+                    -dataarray(j,i,6)*SIN(Pi/3)-dataarray(y,x,7)*SIN(2*Pi/3))/(sum(dataarray(j,i,:)))                
             end do
         end do
 
     end subroutine calculate_vel
 
-    subroutine calculate_meandensity(meandensity,dataarray, velocities,x,y)
-        real(8) :: intent(in) :: velocities(y,x,2), dataarray(y,x,7)
-        real(8) :: intent(out) :: meandensity(y,x,7)
+    subroutine calculate_equildensity(equildensity, velocities,x,y)
+
+        
         integer, intent(in) :: x,y
-        integer:: i
+        real(8),  intent(in) :: velocities(y,x,2)
+        real(8),  intent(out) :: equildensity(y,x,7)
+        real(8) :: direction1D(12)
+        real(8) :: direction(6,2)
+        real(8), parameter :: Pi=4*atan(1d0)
+        integer :: i,j,k
 
-        do i=1,7
-            if (i==1) then
-                meandensity=1/2*(1+4*)
+        direction1D=[1._8,COS(Pi/3),COS(2*Pi/3),-1._8,COS(4*Pi/3),COS(5*Pi/3), &
+             0._8,SIN(Pi/3),SIN(2*Pi/3),0._8,SIN(4*Pi/3),SIN(5*Pi/3)]
+        direction=reshape(direction1D,[6,2])        
 
-    end subroutine calculate_meandensity
+        do i=1,x
+            do j=1,y
+                do k=1,7
+                    if (k==1) then
+                        equildensity(j,i,k)=1/2*(1-2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)))
+                    else
+                        equildensity(j,i,k)=1/12*(1+4*dot_product(velocities(j,i,1:2),direction(k-1,1:2)) &
+                            -2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)) &
+                                +8*dot_product(velocities(j,i,1:2),direction(k-1,1:2))**2)
+                    end if
+                end do
+            end do
+        end do        
+    
+    end subroutine calculate_equildensity
 
 
 end subroutine timestep

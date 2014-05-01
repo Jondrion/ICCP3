@@ -26,7 +26,7 @@ program Boltz
 
     call timestep(gridarray, n_x, n_y)
 
-    print *,"grid"
+    print *,"after timestep"
     call disp(sum(gridarray,3))
 
 end program
