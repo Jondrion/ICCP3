@@ -1,6 +1,6 @@
-0.25 relaxtime
+10 relaxtime
 8 tubewidth
 10 tubelength
 2 gridsize
 7 gridtype
-1.0 pressure
+0.1 pressure

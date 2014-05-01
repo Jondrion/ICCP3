@@ -19,7 +19,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime)
 
     call calculate_equildensity(equildensity,velocities, x, y)
 
-    !call relax_density(dataarray,equildensity,x,y,relaxtime)
+    call relax_density(dataarray,equildensity,x,y,relaxtime)
 
 
 contains
@@ -142,7 +142,7 @@ contains
 
         do i=2,x-1
             do j=2,y-1
-                velocities(j,i,1)=velocities(j,i,1) + pressure_grad/sum(dataarray(j,i,:))
+                if ( sum(dataarray(j,i,:)) > 0 ) velocities(j,i,1)=velocities(j,i,1) + pressure_grad/sum(dataarray(j,i,:))
             end do
         end do
 
@@ -178,6 +178,9 @@ contains
                 end do
             end do
         end do
+
+        print *,"equildensity: "
+        call disp(equildensity(:,:,2))
     
     end subroutine calculate_equildensity
 
@@ -186,7 +189,7 @@ contains
         real(8), intent(in) :: relaxtime, equildensity(y,x,7)
         real(8), intent(inout) :: dataarray(y,x,7)
 
-        dataarray(:,:,:) = (1._8-1._8/relaxtime)*dataarray(:,:,:)+(1._8/relaxtime)*equildensity(:,:,:)
+        dataarray(2:y-1,2:x-1,:) = (1._8-1._8/relaxtime)*dataarray(2:y-1,2:x-1,:)+(1._8/relaxtime)*equildensity(2:y-1,2:x-1,:)
         
     end subroutine relax_density
 

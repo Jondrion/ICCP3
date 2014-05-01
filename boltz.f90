@@ -3,9 +3,9 @@ program Boltz
     use dispmodule
 
     implicit none
-    real(8) :: lsize, relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad
+    real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad
     real(8), allocatable :: gridarray(:,:,:)
-    integer :: gridtype, n_y, n_x
+    integer :: gridtype, n_y, n_x, i
 
     call parameters(relaxtime, tubewidth, tubelength, gridsize, gridtype, pressure)
     pressure_grad = pressure/tubelength
@@ -24,16 +24,14 @@ program Boltz
     gridarray(3,2,1:7)=1
     gridarray(2,5,1:7)=1
 
+    print *,"intial distribution"
     call disp(sum(gridarray,3))
 
-    call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime)
-
-    print *,"after timestep 1"
-    call disp(sum(gridarray,3))
-
-    call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime)
-    print *,"after timestep 2"
-    call disp(sum(gridarray,3))
+    do i = 1, 20
+      call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime)
+      print *,"after timestep ", i, " total density: ", sum(gridarray)
+      call disp(sum(gridarray,3))
+    end do
 
 end program
 
