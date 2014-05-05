@@ -6,29 +6,36 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x)
+    integer :: mask(y,x)
 
-    
+    !-- temporary code
+    !-- make mask for boundaries: array of all nodes which is 0 for internal and 3 for external points
+    mask=0
+    mask(1,:)=3
+    mask(:,1)=3
+    mask(y,:)=3
+    mask(:,x)=3
 
-    call movedensity(dataarray,x,y)
-    
-    call reverse_bnd_vel(dataarray,x,y)
+    call movedensity(dataarray, mask, x, y)
 
     call calculate_vel(velocities, dataarray, x, y)
+
+    call disp(velocities(:,:,2))
 
     !call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
     call calculate_equildensity(equildensity,dataarray,velocities, x, y)
 
-    !call relax_density(dataarray,equildensity,x,y,relaxtime)
+    call relax_density(dataarray,equildensity,x,y,relaxtime)
 
 
 contains
 
-    subroutine movedensity(dataarray, x, y)
-        integer, intent(in) :: x,y
+    subroutine movedensity(dataarray,mask,x,y)
+        integer, intent(in) :: x,y, mask(y,x)
         real(8), intent(inout) :: dataarray(y,x,7)
         real(8) :: temparray(y,x,7)
-        integer :: i,j,k, e_ik(2,7), e_jk(2,7)
+        integer :: i,j,k, e_ik(2,7), e_jk(2,7), inew, jnew, knew
 
         temparray=0
 
@@ -40,13 +47,15 @@ contains
 
         do j=1, x
             do i=1,y
-                do k=1,7
-                    if (dataarray(i,j,k)==0) then
-                        !- do nothing, you are probably at a boundary
-                    else if (mod(i,2)==0) then
-                        temparray(i+e_ik(1,k),j+e_jk(2,k),k)=dataarray(i,j,k)
-                    else
-                        temparray(i+e_ik(2,k),j+e_jk(2,k),k)=dataarray(i,j,k)
+                temparray(i,j,1)=dataarray(i,j,1)
+                do k=2,7
+                    inew=i+e_ik(1+mod(i,2),k)
+                    jnew=j+e_jk(1+mod(i,2),k)
+                    knew=mod((k-2+mask(inew,jnew)),6)+2
+
+                    !-- only move densities in direction of domain
+                    if ( inew > 0 .and. inew < y+1 .and. jnew > 0 .and. jnew < x+1 ) then
+                        temparray(inew,jnew,knew)=dataarray(i,j,k)
                     end if
                 end do
             end do
@@ -55,43 +64,6 @@ contains
         dataarray=temparray
 
     end subroutine movedensity
-
-    subroutine reverse_bnd_vel(dataarray, x, y)
-        integer, intent(in) :: x, y
-        real(8), intent(inout) :: dataarray(y,x,7)
-        real(8) :: tempval
-        
-        integer :: i,k
-
-        do i=1,x
-            do k=2,4
-                !- top row beyond system boundaries
-                tempval=dataarray(1,i,k)
-                dataarray(1,i,k)=dataarray(1,i,k+3)
-                dataarray(1,i,k+3)=tempval
-
-                !- bottom row beyond system boundaries
-                tempval=dataarray(y,i,k)
-                dataarray(y,i,k)=dataarray(y,i,k+3)
-                dataarray(y,i,k+3)=tempval
-            end do
-        end do
-
-        do i=2,y-1
-            do k=2,4
-                !- left row beyond system boundaries
-                tempval=dataarray(i,1,k)
-                dataarray(i,1,k)=dataarray(i,1,k+3)
-                dataarray(i,1,k+3)=tempval
-
-                !- right row beyond system boundaries
-                tempval=dataarray(i,x,k)
-                dataarray(i,x,k)=dataarray(i,x,k+3)
-                dataarray(i,x,k+3)=tempval
-            end do
-        end do
-
-    end subroutine reverse_bnd_vel
 
     subroutine calculate_vel(velocities,dataarray,x,y)
         integer, intent(in) :: x, y

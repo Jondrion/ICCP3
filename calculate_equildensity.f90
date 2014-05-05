@@ -19,8 +19,8 @@ subroutine calculate_equildensity(equildensity, totaldensity, velocities,x,y)
 !     print *,"totaldensity: "
 !     call disp(totaldensity)
 
-     do i=1,x
-        do j=1,y
+     do i=2,x-1
+        do j=2,y-1
             do k=1,7
                 if (k==1) then
                     equildensity(j,i,k)=1._8/2*totaldensity(j,i)*(1-2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)))                        
