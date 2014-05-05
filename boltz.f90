@@ -25,17 +25,19 @@ program Boltz
     allocate(velocities(n_y,n_x,2))
     allocate(rho(n_y,n_x))
     velocities=0._8
-    velocities(:,:,1)=0.1_8
+!     velocities(:,:,1)=0._8
     rho=1._8
     call calculate_equildensity(gridarray,rho,velocities,n_x,n_y)
+    call disp(sum(gridarray,3))
     gridarray(1,:,:)=0
     gridarray(:,1,:)=0
     gridarray(n_y,:,:)=0
     gridarray(:,n_x,:)=0
 
-    do i = 1, 50
+    do i = 1, 5
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho)
       print *,"after timestep ", i, " total density: ", sum(gridarray)
+      call disp(sum(gridarray,3))
     end do
 
 end program

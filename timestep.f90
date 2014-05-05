@@ -19,7 +19,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
 
     call calculate_equildensity(equildensity,dataarray,velocities, x, y)
 
-    call relax_density(dataarray,equildensity,x,y,relaxtime)
+    !call relax_density(dataarray,equildensity,x,y,relaxtime)
 
 
 contains
@@ -28,9 +28,15 @@ contains
         integer, intent(in) :: x,y
         real(8), intent(inout) :: dataarray(y,x,7)
         real(8) :: temparray(y,x,7)
-        integer :: i,j,k
+        integer :: i,j,k, e_ik(2,7), e_jk(2,7)
 
         temparray=0
+
+        !-- directions:
+        e_ik(1,:)=[0,0,-1,-1,0,1,1]
+        e_jk(1,:)=[0,1,1,0,-1,0,1]
+        e_ik(2,:)=[0,0,-1,-1,0,1,1]
+        e_jk(2,:)=[0,1,0,-1,-1,-1,0]
 
         do j=1, x
             do i=1,y
@@ -38,37 +44,9 @@ contains
                     if (dataarray(i,j,k)==0) then
                         !- do nothing, you are probably at a boundary
                     else if (mod(i,2)==0) then
-                        if (k==1) then
-                            temparray(i,j,k)=dataarray(i,j,k)
-                        else if (k==2) then
-                            temparray(i,j+1,k)=dataarray(i,j,k)
-                        else if (k==3) then
-                            temparray(i-1,j+1,k)=dataarray(i,j,k)
-                        else if (k==4) then
-                            temparray(i-1,j,k)=dataarray(i,j,k)
-                        else if (k==5) then
-                            temparray(i,j-1,k)=dataarray(i,j,k)
-                        else if (k==6) then
-                            temparray(i+1,j,k)=dataarray(i,j,k)
-                        else if (k==7) then
-                            temparray(i+1,j+1,k)=dataarray(i,j,k)
-                        end if
+                        temparray(i+e_ik(1,k),j+e_jk(2,k),k)=dataarray(i,j,k)
                     else
-                        if (k==1) then
-                            temparray(i,j,k)=dataarray(i,j,k)
-                        else if (k==2) then
-                            temparray(i,j+1,k)=dataarray(i,j,k)
-                        else if (k==3) then
-                            temparray(i-1,j,k)=dataarray(i,j,k)
-                        else if (k==4) then
-                            temparray(i-1,j-1,k)=dataarray(i,j,k)
-                        else if (k==5) then
-                            temparray(i,j-1,k)=dataarray(i,j,k)
-                        else if (k==6) then
-                            temparray(i+1,j-1,k)=dataarray(i,j,k)
-                        else if (k==7) then
-                            temparray(i+1,j,k)=dataarray(i,j,k)
-                        end if
+                        temparray(i+e_ik(2,k),j+e_jk(2,k),k)=dataarray(i,j,k)
                     end if
                 end do
             end do
