@@ -4,7 +4,7 @@ program Boltz
 
     implicit none
     real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad
-    real(8), allocatable :: gridarray(:,:,:)
+    real(8), allocatable :: gridarray(:,:,:), velocities(:,:,:)
     integer :: gridtype, n_y, n_x, i
 
     call parameters(relaxtime, tubewidth, tubelength, gridsize, gridtype, pressure)
@@ -21,16 +21,19 @@ program Boltz
 
     gridarray=0
 
-    gridarray(3,2,1:7)=1
-    gridarray(2,5,1:7)=1
+!-- Calculate intial density distribution (given certain mean velocity)
+    allocate(velocities(n_y,n_x,2))
+    velocities=0._8
+    velocities(:,:,1)=0.1_8
+    call calculate_equildensity(gridarray,velocities,n_x,n_y)
+    gridarray(1,:,:)=0
+    gridarray(:,1,:)=0
+    gridarray(n_y,:,:)=0
+    gridarray(:,n_x,:)=0
 
-    print *,"intial distribution"
-    call disp(sum(gridarray,3))
-
-    do i = 1, 20
+    do i = 1, 1000
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime)
       print *,"after timestep ", i, " total density: ", sum(gridarray)
-      call disp(sum(gridarray,3))
     end do
 
 end program
