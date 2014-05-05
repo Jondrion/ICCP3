@@ -1,11 +1,11 @@
-subroutine timestep(dataarray, x, y, pressure_grad, relaxtime)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
     
     use dispmodule
     integer, intent(in) :: x,y
     real(8), intent(in) :: pressure_grad, relaxtime
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8) :: velocities(y,x,2)
-    real(8) :: equildensity(y,x,7)
+    real(8) :: equildensity(y,x,7), totaldensity(y,x)
 
     
 
@@ -15,11 +15,11 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime)
 
     call calculate_vel(velocities, dataarray, x, y)
 
-    call add_pressure(dataarray,velocities,x,y,pressure_grad)
+    !call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
     call calculate_equildensity(equildensity,dataarray,velocities, x, y)
 
-    call relax_density(dataarray,equildensity,x,y,relaxtime)
+    !call relax_density(dataarray,equildensity,x,y,relaxtime)
 
 
 contains
@@ -28,9 +28,15 @@ contains
         integer, intent(in) :: x,y
         real(8), intent(inout) :: dataarray(y,x,7)
         real(8) :: temparray(y,x,7)
-        integer :: i,j,k
+        integer :: i,j,k, e_ik(2,7), e_jk(2,7)
 
         temparray=0
+
+        !-- directions:
+        e_ik(1,:)=[0,0,-1,-1,0,1,1]
+        e_jk(1,:)=[0,1,1,0,-1,0,1]
+        e_ik(2,:)=[0,0,-1,-1,0,1,1]
+        e_jk(2,:)=[0,1,0,-1,-1,-1,0]
 
         do j=1, x
             do i=1,y
@@ -38,37 +44,9 @@ contains
                     if (dataarray(i,j,k)==0) then
                         !- do nothing, you are probably at a boundary
                     else if (mod(i,2)==0) then
-                        if (k==1) then
-                            temparray(i,j,k)=dataarray(i,j,k)
-                        else if (k==2) then
-                            temparray(i,j+1,k)=dataarray(i,j,k)
-                        else if (k==3) then
-                            temparray(i-1,j+1,k)=dataarray(i,j,k)
-                        else if (k==4) then
-                            temparray(i-1,j,k)=dataarray(i,j,k)
-                        else if (k==5) then
-                            temparray(i,j-1,k)=dataarray(i,j,k)
-                        else if (k==6) then
-                            temparray(i+1,j,k)=dataarray(i,j,k)
-                        else if (k==7) then
-                            temparray(i+1,j+1,k)=dataarray(i,j,k)
-                        end if
+                        temparray(i+e_ik(1,k),j+e_jk(2,k),k)=dataarray(i,j,k)
                     else
-                        if (k==1) then
-                            temparray(i,j,k)=dataarray(i,j,k)
-                        else if (k==2) then
-                            temparray(i,j+1,k)=dataarray(i,j,k)
-                        else if (k==3) then
-                            temparray(i-1,j,k)=dataarray(i,j,k)
-                        else if (k==4) then
-                            temparray(i-1,j-1,k)=dataarray(i,j,k)
-                        else if (k==5) then
-                            temparray(i,j-1,k)=dataarray(i,j,k)
-                        else if (k==6) then
-                            temparray(i+1,j-1,k)=dataarray(i,j,k)
-                        else if (k==7) then
-                            temparray(i+1,j,k)=dataarray(i,j,k)
-                        end if
+                        temparray(i+e_ik(2,k),j+e_jk(2,k),k)=dataarray(i,j,k)
                     end if
                 end do
             end do
@@ -125,10 +103,12 @@ contains
 
         do i=1,x
             do j=1,y
-                velocities(j,i,1)=(dataarray(j,i,2)+dataarray(j,i,3)*COS(Pi/3)+dataarray(j,i,4)*COS(2*Pi/3)-dataarray(j,i,5) &
-                    -dataarray(j,i,6)*COS(Pi/3)-dataarray(j,i,7)*COS(2*Pi/3))
-                velocities(j,i,2)=(-dataarray(j,i,3)*SIN(Pi/3)-dataarray(j,i,4)*SIN(2*Pi/3) &
-                    -dataarray(j,i,6)*SIN(4*Pi/3)-dataarray(j,i,7)*SIN(5*Pi/3))              
+                if ( sum(dataarray(j,i,:)) > 0 ) then
+                    velocities(j,i,1)=(dataarray(j,i,2)+dataarray(j,i,3)*COS(Pi/3)+dataarray(j,i,4)*COS(2*Pi/3)-dataarray(j,i,5) &
+                        -dataarray(j,i,6)*COS(Pi/3)-dataarray(j,i,7)*COS(2*Pi/3))/sum(dataarray(j,i,:))
+                    velocities(j,i,2)=(-dataarray(j,i,3)*SIN(Pi/3)-dataarray(j,i,4)*SIN(2*Pi/3) &
+                        -dataarray(j,i,6)*SIN(4*Pi/3)-dataarray(j,i,7)*SIN(5*Pi/3))/sum(dataarray(j,i,:))
+                end if     
             end do
         end do
 
@@ -147,47 +127,6 @@ contains
         end do
 
     end subroutine add_pressure
-
-    subroutine calculate_equildensity(equildensity, dataarray, velocities,x,y)
-
-        use dispmodule
-        integer, intent(in) :: x,y
-        real(8),  intent(in) :: velocities(y,x,2), dataarray(y,x, 7)
-        real(8),  intent(out) :: equildensity(y,x,7)
-        real(8) :: direction1D(12)
-        real(8) :: direction(6,2)
-        real(8), parameter :: Pi=4*atan(1d0)
-        real(8) :: totaldensity(y,x)
-        integer :: i,j,k
-
-        direction1D=[1._8,COS(Pi/3),COS(2*Pi/3),-1._8,COS(4*Pi/3),COS(5*Pi/3), &
-             0._8,SIN(Pi/3),SIN(2*Pi/3),0._8,SIN(4*Pi/3),SIN(5*Pi/3)]
-        direction=reshape(direction1D,[6,2])
-
-        totaldensity=sum(dataarray,3)
-        equildensity=0
-
-        print *,"totaldensity: "
-        call disp(totaldensity)
-
-         do i=1,x
-            do j=1,y
-                do k=1,7
-                    if (k==1) then
-                        equildensity(j,i,k)=1._8/2*totaldensity(j,i)*(1-2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)))                        
-                    else
-                        equildensity(j,i,k)=1._8/12*totaldensity(j,i)*(1+4*dot_product(velocities(j,i,1:2),direction(k-1,1:2)) &
-                            -2*dot_product(velocities(j,i,1:2),velocities(j,i,1:2)) &
-                                +8*dot_product(velocities(j,i,1:2),direction(k-1,1:2))**2)
-                    end if
-                end do
-            end do
-        end do
-
-        print *,"equildensity: "
-        call disp(equildensity(:,:,2))
-    
-    end subroutine calculate_equildensity
 
     subroutine relax_density(dataarray,equildensity,x,y,relaxtime)
         integer, intent(in) :: x,y
