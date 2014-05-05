@@ -1,11 +1,11 @@
-subroutine timestep(dataarray, x, y, pressure_grad, relaxtime)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
     
     use dispmodule
     integer, intent(in) :: x,y
     real(8), intent(in) :: pressure_grad, relaxtime
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8) :: velocities(y,x,2)
-    real(8) :: equildensity(y,x,7)
+    real(8) :: equildensity(y,x,7), totaldensity(y,x)
 
     
 
@@ -17,7 +17,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime)
 
     !call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
-    call calculate_equildensity(equildensity,velocities, x, y)
+    call calculate_equildensity(equildensity,dataarray,velocities, x, y)
 
     call relax_density(dataarray,equildensity,x,y,relaxtime)
 
