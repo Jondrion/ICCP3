@@ -20,12 +20,12 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
 
     call calculate_vel(velocities, dataarray, x, y)
 
-    call disp(velocities(:,:,2))
-
     !call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
-    call calculate_equildensity(equildensity,dataarray,velocities, x, y)
+    call calculate_equildensity(equildensity,totaldensity,velocities, x, y)
 
+!     print *,'equildensity: '
+!     call disp(sum(equildensity,3))
     call relax_density(dataarray,equildensity,x,y,relaxtime)
 
 
@@ -51,6 +51,7 @@ contains
                 do k=2,7
                     inew=i+e_ik(1+mod(i,2),k)
                     jnew=j+e_jk(1+mod(i,2),k)
+                    !-- reverse direction if at boundary point
                     knew=mod((k-2+mask(inew,jnew)),6)+2
 
                     !-- only move densities in direction of domain

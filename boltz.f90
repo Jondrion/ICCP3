@@ -25,14 +25,16 @@ program Boltz
     allocate(velocities(n_y,n_x,2))
     allocate(rho(n_y,n_x))
     velocities=0._8
+    velocities(:,:,1)=0.1_8
     rho=1._8
     call calculate_equildensity(gridarray,rho,velocities,n_x,n_y)
+    print *,'initial distribution: '
     call disp(sum(gridarray,3))
-    
-    do i = 1, 8
+
+    do i = 1, 1000
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho)
       print *,"after timestep ", i, " total density: ", sum(gridarray)
-      call disp(sum(gridarray,3))
+      !call disp(sum(gridarray,3))
     end do
 
 end program
