@@ -16,14 +16,8 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
     mask(y,:)=3
 !     mask(:,x)=3
     !-- cube in centre
-    mask(13:17,10:14)=3
-
-    !-- make density on wall points zero
-!     do j = 1, x
-!         do i = 1, y
-!             if ( mask(i,j) == 3 ) dataarray(i,j,:)=0 
-!         end do
-!     end do
+    mask(14:15,10:12)=3
+    mask(7:27,20:22)=3
 
     call movedensity(dataarray, mask, x, y)
 
@@ -33,8 +27,6 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
 
     call calculate_equildensity(equildensity,totaldensity,velocities, x, y)
 
-!     print *,'equildensity: '
-!     call disp(sum(equildensity,3))
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
 
@@ -61,7 +53,6 @@ contains
                     inew=i+e_ik(1+modulo(i,2),k)
                     !-- periodic bc in x-direction
                     jnew=modulo((j+e_jk(1+modulo(i,2),k)-1),x)+1
-                    !jnew=j+e_jk(1+modulo(i,2),k)
                     !-- reverse direction if at boundary point
                     knew=modulo((k-2+mask(inew,jnew)),6)+2
 
@@ -129,7 +120,6 @@ contains
                 if ( mask(j,i) == 0 ) dataarray(j,i,:) = (1._8-1._8/relaxtime)*dataarray(j,i,:)+(1._8/relaxtime)*equildensity(j,i,:) 
             end do
         end do
-!         dataarray(2:y-1,2:x-1,:) = (1._8-1._8/relaxtime)*dataarray(2:y-1,2:x-1,:)+(1._8/relaxtime)*equildensity(2:y-1,2:x-1,:)
         
     end subroutine relax_density
 
