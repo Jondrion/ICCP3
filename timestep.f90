@@ -20,13 +20,13 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
 
     call calculate_vel(velocities, dataarray, x, y)
 
-    !call add_pressure(dataarray,velocities,x,y,pressure_grad)
+    call add_pressure(dataarray,velocities,x,y,pressure_grad)
 
     call calculate_equildensity(equildensity,totaldensity,velocities, x, y)
 
 !     print *,'equildensity: '
 !     call disp(sum(equildensity,3))
-    call relax_density(dataarray,equildensity,x,y,relaxtime)
+    call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
 
 contains
@@ -50,6 +50,8 @@ contains
                 temparray(i,j,1)=dataarray(i,j,1)
                 do k=2,7
                     inew=i+e_ik(1+mod(i,2),k)
+                    !-- periodic bc in x-direction
+                    !jnew=mod((j+e_jk(1+mod(i,2),k)-1),x)+1
                     jnew=j+e_jk(1+mod(i,2),k)
                     !-- reverse direction if at boundary point
                     knew=mod((k-2+mask(inew,jnew)),6)+2
@@ -93,20 +95,26 @@ contains
         real(8), intent(inout) :: velocities(y,x,2)
         integer :: i,j
 
-        do i=2,x-1
-            do j=2,y-1
+        do i=1,x
+            do j=1,y
                 if ( sum(dataarray(j,i,:)) > 0 ) velocities(j,i,1)=velocities(j,i,1) + pressure_grad/sum(dataarray(j,i,:))
             end do
         end do
 
     end subroutine add_pressure
 
-    subroutine relax_density(dataarray,equildensity,x,y,relaxtime)
-        integer, intent(in) :: x,y
+    subroutine relax_density(dataarray,equildensity,mask,x,y,relaxtime)
+        integer, intent(in) :: x,y, mask(y,x)
         real(8), intent(in) :: relaxtime, equildensity(y,x,7)
         real(8), intent(inout) :: dataarray(y,x,7)
 
-        dataarray(2:y-1,2:x-1,:) = (1._8-1._8/relaxtime)*dataarray(2:y-1,2:x-1,:)+(1._8/relaxtime)*equildensity(2:y-1,2:x-1,:)
+        !-- relax densities only on internal points (where mask is equal to zero)
+        do i = 1, x
+            do j = 1, y
+                if ( mask(j,i) == 0 ) dataarray(j,i,:) = (1._8-1._8/relaxtime)*dataarray(j,i,:)+(1._8/relaxtime)*equildensity(j,i,:) 
+            end do
+        end do
+!         dataarray(2:y-1,2:x-1,:) = (1._8-1._8/relaxtime)*dataarray(2:y-1,2:x-1,:)+(1._8/relaxtime)*equildensity(2:y-1,2:x-1,:)
         
     end subroutine relax_density
 

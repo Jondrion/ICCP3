@@ -1,6 +1,7 @@
 program Boltz
     
     use dispmodule
+    use PLplot3D
 
     implicit none
     real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad
@@ -11,6 +12,7 @@ program Boltz
     pressure_grad = pressure/tubelength
     print *, "relaxtime=",relaxtime, "tubewidth", tubewidth, "tubelength", tubelength, "pressure", pressure
 
+    call plot_init()
 
 !-- Create the grid array
     n_y = int(tubewidth/(gridsize*SQRT(3._8)/2._8))+1
