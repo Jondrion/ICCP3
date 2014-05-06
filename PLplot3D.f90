@@ -73,7 +73,7 @@ use dispmodule
 
     call plcol0(7)
     call plenv(xmin, xmax, ymin, ymax, 0, 0)
-    call PLshades(vector(2:y-1,:,1), defined, xmin, xmax, ymin, ymax, clev,1, 1, 0,xg(2:y-1,:),yg(2:y-1,:)) 
+    call PLshades(vector(2:y-1,:,1), defined, xmin, xmax, ymin, ymax, clev,1._plflt, 1, 0._plflt,xg(2:y-1,:),yg(2:y-1,:)) 
 
     call plcol0(3)
     call plvect(vector(:,:,1),vector(:,:,2),0.0_plflt,xg,yg)

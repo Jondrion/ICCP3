@@ -15,6 +15,15 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
 !     mask(:,1)=3
     mask(y,:)=3
 !     mask(:,x)=3
+    !-- cube in centre
+    mask(13:17,10:14)=3
+
+    !-- make density on wall points zero
+!     do j = 1, x
+!         do i = 1, y
+!             if ( mask(i,j) == 3 ) dataarray(i,j,:)=0 
+!         end do
+!     end do
 
     call movedensity(dataarray, mask, x, y)
 
@@ -56,10 +65,16 @@ contains
                     !-- reverse direction if at boundary point
                     knew=modulo((k-2+mask(inew,jnew)),6)+2
 
-                    !-- only move densities in direction of domain
-                    if ( inew > 0 .and. inew < y+1 .and. jnew > 0 .and. jnew < x+1 ) then
-                        temparray(inew,jnew,knew)=dataarray(i,j,k)
+                    !-- do bounce-back in one time step and make wall points have zero density
+                    if ( mask(inew,jnew) == 3 ) then
+                        inew=i
+                        jnew=j
                     end if
+
+                    !-- only move densities in direction of domain
+                     if ( mask(i,j) == 0 ) then
+                        temparray(inew,jnew,knew)=dataarray(i,j,k)
+                     end if
                 end do
             end do
         end do
