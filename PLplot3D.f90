@@ -49,13 +49,13 @@ subroutine plot_points(vector, x, y)
     ymax=y+1._plflt
 
     do k=1,11
-       clev(k)=minval(vector(:,:,1))+dble(k-1)/dble(10)*(maxval(vector(:,:,1))-minval(vector(:,:,1)))
+       clev(k)=minval(vector(2:y-1,:,1))+dble(k-1)/dble(10)*(maxval(vector(2:y-1,:,1))-minval(vector(2:y-1,:,1)))
     enddo 
 
     !call plclear()
     call plcol0(2)
     call plenv(xmin, xmax, ymin, ymax, 0, 0)
-    call PLshades(vector(:,:,1), defined, xmin, xmax, ymin, ymax, clev,2._plflt, 0, 0._plflt,xg,yg)    
+    call PLshades(vector(2:y-1,:,1), defined, xmin, xmax, ymin, ymax, clev,2, 0, 0,xg(2:y-1,:),yg(2:y-1,:))    
     call plcol0(3)
     call plvect(vector(:,:,1),vector(:,:,2),0.0_plflt,xg,yg)
     call plcol0(1)
