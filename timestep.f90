@@ -49,12 +49,12 @@ contains
             do i=1,y
                 temparray(i,j,1)=dataarray(i,j,1)
                 do k=2,7
-                    inew=i+e_ik(1+mod(i,2),k)
+                    inew=i+e_ik(1+modulo(i,2),k)
                     !-- periodic bc in x-direction
-                    jnew=mod((j+e_jk(1+mod(i,2),k)-1),x)+1
-                    !jnew=j+e_jk(1+mod(i,2),k)
+                    jnew=modulo((j+e_jk(1+modulo(i,2),k)-1),x)+1
+                    !jnew=j+e_jk(1+modulo(i,2),k)
                     !-- reverse direction if at boundary point
-                    knew=mod((k-2+mask(inew,jnew)),6)+2
+                    knew=modulo((k-2+mask(inew,jnew)),6)+2
 
                     !-- only move densities in direction of domain
                     if ( inew > 0 .and. inew < y+1 .and. jnew > 0 .and. jnew < x+1 ) then

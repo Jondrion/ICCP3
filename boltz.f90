@@ -33,15 +33,16 @@ program Boltz
     print *,'initial distribution: '
     call disp(sum(gridarray,3))
 
-    do i = 1, 1000
+    do i = 1, 300
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray)
-      print *,"velocities x: "
-      call disp(velocities(:,:,1))
-      print *,"velocities y: "
-      call disp(velocities(:,:,2))
       call plot_points(velocities, n_x, n_y)
     end do
+
+!     print *,'velocity x: '
+!     call disp(velocities(:,:,1))
+!     print *,'velocity y: '
+!     call disp(velocities(:,:,2))
 
 end program
 
