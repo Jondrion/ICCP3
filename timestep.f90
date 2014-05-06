@@ -1,10 +1,10 @@
-subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, velocities)
     
     use dispmodule
     integer, intent(in) :: x,y
     real(8), intent(in) :: pressure_grad, relaxtime
     real(8), intent(inout) :: dataarray(y,x,7)
-    real(8) :: velocities(y,x,2)
+    real(8), intent(out) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x)
     integer :: mask(y,x)
 
@@ -12,9 +12,9 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity)
     !-- make mask for boundaries: array of all nodes which is 0 for internal and 3 for external points
     mask=0
     mask(1,:)=3
-    mask(:,1)=3
+!     mask(:,1)=3
     mask(y,:)=3
-    mask(:,x)=3
+!     mask(:,x)=3
 
     call movedensity(dataarray, mask, x, y)
 
@@ -51,8 +51,8 @@ contains
                 do k=2,7
                     inew=i+e_ik(1+mod(i,2),k)
                     !-- periodic bc in x-direction
-                    !jnew=mod((j+e_jk(1+mod(i,2),k)-1),x)+1
-                    jnew=j+e_jk(1+mod(i,2),k)
+                    jnew=mod((j+e_jk(1+mod(i,2),k)-1),x)+1
+                    !jnew=j+e_jk(1+mod(i,2),k)
                     !-- reverse direction if at boundary point
                     knew=mod((k-2+mask(inew,jnew)),6)+2
 
