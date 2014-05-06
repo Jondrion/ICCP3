@@ -22,10 +22,10 @@ subroutine plot_init()
     
     call plsvect(arrow2_x, arrow2_y, .false.)
 
-    ! -- change color sheme for plshades to blue
+    ! -- change color sheme for plshades to blue and orange
     do k=1,nc+1
-       col1(k)=0
-       col2(k)=0
+       col1(k)=int(dble(nc+1-k)/dble(nc)*255)
+       col2(k)=100
        col3(k)=int(dble(k-1)/dble(nc)*255)
        call plscmap1( col1 ,col2 ,col3)
     enddo
@@ -52,10 +52,10 @@ use dispmodule
 
     do i=1,x
         xx = i
-        line(i)=y-0.5
+        line(i)=y
         do j=1,y
           yy = j
-          xg(j,i) = xx
+          xg(j,i) = xx+modulo(j+1,2)*0.5
           yg(j,i) = yy
         end do
     end do
@@ -79,7 +79,7 @@ use dispmodule
     call plvect(vector(:,:,1),vector(:,:,2),0.0_plflt,xg,yg)
 
     call plcol0(1)
-    call plline(xg(1,:),line )
+    call plline(xg(1,:),line-1 )
     call plline(xg(1,:),line-y+2) 
     
     call plflush()
