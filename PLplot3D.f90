@@ -24,16 +24,18 @@ end subroutine plot_init
 
 subroutine plot_points(vector, x, y)
     integer, intent(in) :: x,y
-    real(8), intent(in) :: vector(y,x,2)
+    real(kind=plflt), intent(in) :: vector(y,x,2)
     real(8) :: xx, yy
     real(kind=plflt) xmin, xmax, ymin, ymax;
-    real(kind=plflt) xg(y,x),yg(y,x)
+    real(kind=plflt) xg(y,x),yg(y,x),line(x)
     integer :: i,j,k
     real(kind=plflt) clev(11)
     character(len=1)  defined
 
     do i=1,x
         xx = i
+
+        line(i)=y-0.5
         do j=1,y
           yy = j
           xg(j,i) = xx
@@ -46,16 +48,20 @@ subroutine plot_points(vector, x, y)
     ymin=0._plflt
     ymax=y+1._plflt
 
-    !do k=1,11
-    !   clev(k)=minval(u)+(k-1)/10*(maxval(u)-minval(u))
-    !enddo 
+    do k=1,11
+       clev(k)=minval(vector(:,:,1))+dble(k-1)/dble(10)*(maxval(vector(:,:,1))-minval(vector(:,:,1)))
+    enddo 
 
     !call plclear()
     call plcol0(2)
-    call plenv(xmin, xmax, ymin, ymax, 0, 0)    
-    call plcol0(1)
+    call plenv(xmin, xmax, ymin, ymax, 0, 0)
+    call PLshades(vector(:,:,1), defined, xmin, xmax, ymin, ymax, clev,2, 0, 0,xg,yg)    
+    call plcol0(3)
     call plvect(vector(:,:,1),vector(:,:,2),0.0_plflt,xg,yg)
-    !call cl-plshades(vector(:,:,1),y,x, defined, xmin, xmax, ymin, ymax, clev, 10,0._plflt, 1, 1._plflt)
+    call plcol0(1)
+    call plline(xg(1,:),line )
+    call plline(xg(1,:),line-y+2)
+    
         
     
     
