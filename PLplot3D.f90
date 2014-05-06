@@ -38,8 +38,8 @@ subroutine plot_points(vector, x, y)
         xx = i
         do j=1,y
           yy = j
-          xg(i,j) = xx
-          yg(i,j) = yy
+          xg(j,i) = xx
+          yg(j,i) = yy
           !u(i,j) = yy
           !v(i,j) = -xx
         enddo
