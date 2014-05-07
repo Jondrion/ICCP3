@@ -16,7 +16,7 @@ subroutine polygon(X_object,np,Object,x,y)
         do j=1,y
           yy = j
           X_nodes(j,i,1) = xx+modulo(j+1,2)*0.5
-          X_nodes(j,i,2) = yy
+          X_nodes(j,i,2) = yy*(sqrt(3._8)/2)
         end do
     end do
 !     print *, "X_object"
@@ -58,16 +58,17 @@ subroutine polygon(X_object,np,Object,x,y)
                     !-- periodic bc in x-direction
                     jnew=modulo((j+e_jk(1+modulo(i,2),k)-1),x)+1
                     if (Object(inew,jnew)==3) then
-                        !print *, "Check", X_nodes(i,j,:)
+                        
                         Crosspoint=0
                         do l=1,np
                             call cross(X_nodes(i,j,:),X_nodes(inew,jnew,:),X_object(l,:),X_object(modulo(l,np)+1,:),Crosspoint)
                             if ( Crosspoint(1)/=0) then
-
+                                
                                 q_vec=Crosspoint-X_nodes(i,j,:)
                                 
-                                q(i,j,k-1)=sqrt(q_vec(1)**2+q_vec(2)**2)
-                                !print *, "eii", q(i,j,k-1)
+                                q(i,j,k-1)=sqrt(q_vec(1)**2+q_vec(2)**2)/ &
+                                    sqrt((X_nodes(i,j,1)-X_nodes(inew,jnew,1))**2+(X_nodes(i,j,2)-X_nodes(inew,jnew,2))**2)
+                                
                                 exit
                             end if
                         end do
