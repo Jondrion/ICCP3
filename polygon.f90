@@ -8,7 +8,7 @@ subroutine polygon(X_object,np,Object,x,y)
     real(8) :: X_nodes(y,x,2), Crosspoint(2)
     integer, intent(out) :: Object(y,x)
     integer :: boolean, i, j, k, l, xx, yy, e_ik(2,7), e_jk(2,7), inew, jnew
-    real(8) :: q(y,x,6), q_vec(2)
+    real(8) :: q(y,x,7), q_vec(2)
 
 
     do i=1,x
@@ -59,30 +59,28 @@ subroutine polygon(X_object,np,Object,x,y)
                     jnew=modulo((j+e_jk(1+modulo(i,2),k)-1),x)+1
                     if (Object(inew,jnew)==3) then
                         
-                        Crosspoint=0
+                        Crosspoint=-1
                         do l=1,np
                             call cross(X_nodes(i,j,:),X_nodes(inew,jnew,:),X_object(l,:),X_object(modulo(l,np)+1,:),Crosspoint)
-                            if ( Crosspoint(1)/=0) then
+                            if ( Crosspoint(1)/=-1) then
                                 
                                 q_vec=Crosspoint-X_nodes(i,j,:)
                                 
-                                q(i,j,k-1)=sqrt(q_vec(1)**2+q_vec(2)**2)/ &
+                                q(i,j,k)=sqrt(q_vec(1)**2+q_vec(2)**2)/ &
                                     sqrt((X_nodes(i,j,1)-X_nodes(inew,jnew,1))**2+(X_nodes(i,j,2)-X_nodes(inew,jnew,2))**2)
                                 
-                                exit
+                                exit                            
                             end if
                         end do
+                    else
+                        !q(i,j,k)=-1
                     end if
                 end do
             end if
         end do
     end do
 
-    print *, "qvalues"
-    call disp( sum(q,3))
-
-    print *, "Object"
-    call disp(Object)
+    
 
 
 
@@ -152,7 +150,7 @@ contains
                 
 
             else
-                Crosspoint=0               
+                Crosspoint=-1               
             end if
         else
 
@@ -178,7 +176,7 @@ contains
 
                                 
             else
-                Crosspoint=0               
+                Crosspoint=-1              
             end if
         end if
 
