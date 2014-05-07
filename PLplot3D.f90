@@ -35,11 +35,11 @@ subroutine plot_init()
 
 end subroutine plot_init
 
-subroutine plot_points(vector, x, y)
+subroutine plot_points(vector, x, y, X_object, n_vertices)
 
 use dispmodule
-    integer, intent(in) :: x,y
-    real(kind=plflt), intent(in) :: vector(y,x,2)
+    integer, intent(in) :: x,y, n_vertices
+    real(kind=plflt), intent(in) :: vector(y,x,2), X_object(n_vertices,2)
     real(8) :: xx, yy
     real(kind=plflt) xmin, xmax, ymin, ymax;
     real(kind=plflt) xg(y,x),yg(y,x),line(x)
@@ -52,18 +52,18 @@ use dispmodule
 
     do i=1,x
         xx = i
-        line(i)=y
+        line(i)=y*sqrt(3._8)/2._8
         do j=1,y
           yy = j
           xg(j,i) = xx+modulo(j+1,2)*0.5
-          yg(j,i) = yy
+          yg(j,i) = yy*sqrt(3._8)/2._8
         end do
     end do
 
     xmin=0._plflt
-    xmax=x+1._plflt
+    xmax=xg(2,x)+1._plflt
     ymin=0._plflt
-    ymax=y+1._plflt
+    ymax=yg(y,1)+0._plflt
 
     do k=1,nc+1
        clev(k)=minval(vector(2:y-1,:,1))+dble(k-1)/dble(nc)*(maxval(vector(2:y-1,:,1))-minval(vector(2:y-1,:,1)))
@@ -73,14 +73,18 @@ use dispmodule
 
     call plcol0(7)
     call plenv(xmin, xmax, ymin, ymax, 0, 0)
-    call PLshades(vector(2:y-1,:,1), defined, xmin, xmax, ymin, ymax, clev,1._plflt, 1, 0._plflt,xg(2:y-1,:),yg(2:y-1,:)) 
+    call PLshades(vector(2:y-1,:,1), defined, xmin, xmax, ymin, ymax, clev,1, 1, 0,xg(2:y-1,:),yg(2:y-1,:)) 
 
     call plcol0(3)
-    call plvect(vector(:,:,1),vector(:,:,2),0.0_plflt,xg,yg)
+    call plvect(vector(:,:,1),vector(:,:,2),8.0_plflt,xg,yg)
 
-    call plcol0(1)
-    call plline(xg(1,:),line-1 )
-    call plline(xg(1,:),line-y+2) 
+    call plcol0(7)
+    !call plline(xg(1,:),line-1 )
+    !call plline(xg(1,:),line-y+2)
+
+    call plfill( X_object(:,1), X_object(:,2) )
+
+
     
     call plflush()
 end subroutine
