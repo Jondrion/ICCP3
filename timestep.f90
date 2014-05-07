@@ -1,12 +1,12 @@
-subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, velocities)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_object, n_vertices, velocities)
     
     use dispmodule
-    integer, intent(in) :: x,y
+    integer, intent(in) :: x,y, n_vertices
     real(8), intent(in) :: pressure_grad, relaxtime
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8), intent(out) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x)
-    real(8) :: X_object(4,2)
+    real(8), intent(inout) :: X_object(n_vertices,2)
     integer :: mask(y,x), Object(y,x)
 
     !-- temporary code
@@ -19,11 +19,8 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
     !-- cube in centre
 !     mask(14:15,10:12)=3
 !     mask(7:27,20:22)=3
+    
 
-    X_object(1,:)=[20._8,15._8]
-    X_object(2,:)=[30._8,15._8]
-    X_object(3,:)=[30._8,19._8]
-    X_object(4,:)=[20._8,19._8]
     call polygon(X_object,4,Object,x,y)
 
     mask(2:y-1,:)=Object(2:y-1,:)

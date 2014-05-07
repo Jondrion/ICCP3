@@ -42,8 +42,8 @@ subroutine polygon(X_object,np,Object,x,y)
 
     Object=(-3)*(Object-1)
 
-!     print *, "Object"
-!     call disp(Object)
+     print *, "Object"
+     call disp(Object)
 
         e_ik(1,:)=[0,0,-1,-1,0,1,1]
         e_jk(1,:)=[0,1,1,0,-1,0,1]
