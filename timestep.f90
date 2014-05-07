@@ -20,10 +20,10 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
 !     mask(14:15,10:12)=3
 !     mask(7:27,20:22)=3
 
-    X_object(1,:)=[20._8,15._8]
-    X_object(2,:)=[30._8,15._8]
-    X_object(3,:)=[30._8,19._8]
-    X_object(4,:)=[20._8,19._8]
+    X_object(1,:)=[4._8,3._8]
+    X_object(2,:)=[7._8,3._8]
+    X_object(3,:)=[7._8,5._8]
+    X_object(4,:)=[4._8,5._8]
     call polygon(X_object,4,Object,x,y)
 
     mask(2:y-1,:)=Object(2:y-1,:)
@@ -65,7 +65,7 @@ contains
                     !-- reverse direction if at boundary point
                     knew=modulo((k-2+mask(inew,jnew)),6)+2
 
-                    !-- do bounce-back in one time step and make wall points have zero density
+                    !-- do bounce-back in one time step and use interpolation
                     if ( mask(inew,jnew) == 3 ) then
                         inew=i
                         jnew=j

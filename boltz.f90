@@ -41,7 +41,7 @@ program Boltz
 !     X_object(4,:)=[2._8,8._8]
 !     call polygon(X_object,4,Object,n_x,n_y)
 
-    do i = 1, 300
+    do i = 1, 100
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray)
       call plot_points(velocities, n_x, n_y)

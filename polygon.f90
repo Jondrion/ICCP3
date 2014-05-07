@@ -80,11 +80,6 @@ subroutine polygon(X_object,np,Object,x,y)
         end do
     end do
 
-    
-
-
-
-
 
 contains
 
