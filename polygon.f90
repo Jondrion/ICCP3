@@ -15,10 +15,10 @@ subroutine polygon(X_object,np,Object,x,y)
           X_nodes(j,i,2) = yy
         end do
     end do
-    print *, "X_object"
-    call disp(X_object)
-    print *, "nodes"
-    call disp(X_nodes(:,:,1))
+!     print *, "X_object"
+!     call disp(X_object)
+!     print *, "nodes"
+!     call disp(X_nodes(:,:,1))
 
 
     Object=0
@@ -35,8 +35,10 @@ subroutine polygon(X_object,np,Object,x,y)
         end do
     end do
 
-    print *, "Object"
-    call disp(Object)
+    Object=(-3)*(Object-1)
+
+!     print *, "Object"
+!     call disp(Object)
 
 
 

@@ -27,29 +27,25 @@ program Boltz
 !-- Calculate intial density distribution (given certain mean velocity)
     allocate(velocities(n_y,n_x,2))
     allocate(rho(n_y,n_x))
-    allocate(Object(n_y,n_x))
+!     allocate(Object(n_y,n_x))
     velocities=0._8
     velocities(:,:,1)=0.1_8
     rho=1._8
     call calculate_equildensity(gridarray,rho,velocities,n_x,n_y)
-    print *,'initial distribution: '
-    call disp(sum(gridarray,3))
+!     print *,'initial distribution: '
+!     call disp(sum(gridarray,3))
 
-    do i = 1, 5
+!     X_object(1,:)=[2._8,2._8]
+!     X_object(2,:)=[8._8,2._8]
+!     X_object(3,:)=[8._8,8._8]
+!     X_object(4,:)=[2._8,8._8]
+!     call polygon(X_object,4,Object,n_x,n_y)
+
+    do i = 1, 300
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray)
       call plot_points(velocities, n_x, n_y)
     end do
-
- 
-    X_object(1,:)=[2._8,2._8]
-    X_object(2,:)=[8._8,2._8]
-    X_object(3,:)=[8._8,8._8]
-    X_object(4,:)=[2._8,8._8]
-
-
-
-    call polygon(X_object,4,Object,n_x,n_y)
     
 !     print *,'velocity x: '
 !     call disp(velocities(:,:,1))

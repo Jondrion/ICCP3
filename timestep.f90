@@ -6,7 +6,8 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8), intent(out) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x)
-    integer :: mask(y,x)
+    real(8) :: X_object(4,2)
+    integer :: mask(y,x), Object(y,x)
 
     !-- temporary code
     !-- make mask for boundaries: array of all nodes which is 0 for internal and 3 for external points
@@ -16,8 +17,16 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, vel
     mask(y,:)=3
 !     mask(:,x)=3
     !-- cube in centre
-    mask(14:15,10:12)=3
-    mask(7:27,20:22)=3
+!     mask(14:15,10:12)=3
+!     mask(7:27,20:22)=3
+
+    X_object(1,:)=[20._8,15._8]
+    X_object(2,:)=[30._8,15._8]
+    X_object(3,:)=[30._8,19._8]
+    X_object(4,:)=[20._8,19._8]
+    call polygon(X_object,4,Object,x,y)
+
+    mask(2:y-1,:)=Object(2:y-1,:)
 
     call movedensity(dataarray, mask, x, y)
 
