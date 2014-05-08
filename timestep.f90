@@ -1,14 +1,16 @@
-subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_object, n_vertices, V_object, M_object,velocities)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_object, n_vertices, V_object, &
+    M_object, CoM, alpha_object, velocities)
     
     use dispmodule
+    implicit none
     integer, intent(in) :: x,y, n_vertices
     real(8), intent(in) :: pressure_grad, relaxtime, M_object
-    real(8), intent(inout) :: dataarray(y,x,7), V_object(2)
+    real(8), intent(inout) :: dataarray(y,x,7), V_object(2), CoM(2)
     real(8), intent(out) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x), q(y,x,7)
-    real(8), intent(inout) :: X_object(n_vertices,2)
+    real(8), intent(inout) :: X_object(n_vertices,2), alpha_object
     integer :: mask(y,x), Object(y,x)
-    real(8) :: DV(y,x,2), CoM(2)
+    real(8) :: DV(y,x,2)
     
 
     !-- temporary code
@@ -37,8 +39,8 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
-    CoM=0
-    call moveobject(X_object, n_vertices,V_object,M_object, DV,x,y,CoM)
+    
+    call moveobject(X_object, n_vertices,V_object,M_object, DV,x,y,CoM, alpha_object)
 
     
 
@@ -142,10 +144,10 @@ contains
         call disp(sum(q,3))
 
 
-        Print *, "DVx"
-        call disp(DV(:,:,1))
-        Print *, "DVy"
-        call disp(DV(:,:,2))
+        !Print *, "DVx"
+        !call disp(DV(:,:,1))
+        !Print *, "DVy"
+        !call disp(DV(:,:,2))
         dataarray=temparray
 
     end subroutine movedensity
@@ -189,6 +191,7 @@ contains
         integer, intent(in) :: x,y, mask(y,x)
         real(8), intent(in) :: relaxtime, equildensity(y,x,7)
         real(8), intent(inout) :: dataarray(y,x,7)
+        integer :: i,j
 
         !-- relax densities only on internal points (where mask is equal to zero)
         do i = 1, x
@@ -199,11 +202,11 @@ contains
         
     end subroutine relax_density
 
-    subroutine moveobject(X_object, n_vertices, V_object, M_object, DV,x,y,CoM)
+    subroutine moveobject(X_object, n_vertices, V_object, M_object, DV,x,y,CoM, alpha_object)
         integer, intent(in) :: n_vertices, x, y
         real(8), intent(in) :: DV(y,x,2), M_object
-        real(8), intent(inout) :: X_object(n_vertices,2), V_object(2),CoM(2)
-        real(8) :: X_nodes(y,x,2), Ftotal(2),R(2), I_object, alpha_object
+        real(8), intent(inout) :: X_object(n_vertices,2), V_object(2),CoM(2), alpha_object
+        real(8) :: X_nodes(y,x,2), Ftotal(2),R(2), I_object, Torq
         integer :: i,j
 
             Ftotal=sum(sum(DV,1),1)

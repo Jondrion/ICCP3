@@ -4,7 +4,7 @@ program Boltz
     use PLplot3D
 
     implicit none
-    real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad, V_object(2), M_object
+    real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad, V_object(2), M_object, CoM(2), alpha_object
     real(8), allocatable :: gridarray(:,:,:), velocities(:,:,:), rho(:,:), X_object(:,:)
     integer :: gridtype, n_y, n_x, i, n_vertices
     
@@ -42,12 +42,16 @@ program Boltz
     X_object(2,:)=[3.5_8,3._8/2._8*sqrt(3._8)+8.5_8]
     X_object(3,:)=[3.5_8,3._8/2._8*sqrt(3._8)+13.5_8]
     X_object(4,:)=[1.5_8,3._8/2._8*sqrt(3._8)+13.5_8]
-    V_object(2)=0
+    V_object=0
     M_object=10
+    CoM(1)=2.5_8
+    CoM(2)=3._8/2._8*sqrt(3._8)+11._8
+    alpha_object=0
 
 
     do i = 1, 200
-      call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, X_object, n_vertices, V_object, M_object, velocities)
+      call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, &
+        X_object, n_vertices, V_object, M_object, CoM,alpha_object, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray), &
         "velox", minval(velocities(:,:,1)), "veloy", minval(velocities(:,:,2))
       call plot_points(velocities, n_x, n_y, X_object, n_vertices)
