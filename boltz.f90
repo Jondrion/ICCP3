@@ -39,14 +39,14 @@ program Boltz
 !     call disp(sum(gridarray,3))
 
     X_object(1,:)=[1.5_8,3._8/2._8*sqrt(3._8)+10.5_8]
-    X_object(2,:)=[3.5_8,3._8/2._8*sqrt(3._8)+10.5_8]
+    X_object(2,:)=[3.5_8,3._8/2._8*sqrt(3._8)+8.5_8]
     X_object(3,:)=[3.5_8,3._8/2._8*sqrt(3._8)+13.5_8]
     X_object(4,:)=[1.5_8,3._8/2._8*sqrt(3._8)+13.5_8]
     V_object(2)=0
-    M_object=100
+    M_object=10000
 
 
-    do i = 1, 3000
+    do i = 1, 300
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, X_object, n_vertices, V_object, M_object, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray), &
         "velox", minval(velocities(:,:,1)), "veloy", minval(velocities(:,:,2))

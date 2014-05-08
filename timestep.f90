@@ -57,6 +57,7 @@ contains
         real(8), intent(out) :: DV(y,x,2)
 
         temparray=0
+        DV=0
 
         !-- directions:
         e_ik(1,:)=[0,0,-1,-1,0,1,1]
@@ -109,11 +110,17 @@ contains
                         i2=i1+e_ik(1+modulo(i1,2),knew)
                         j2=modulo((j1+e_jk(1+modulo(i1,2),knew)-1),x)+1
                         !-- different interpolation depending on q
-                        if ( q(i,j,k) < 0.5_8 ) temparray(inew,jnew,knew) = ( q(i,j,k)*(1._8+2._8*q(i,j,k))*dataarray(i,j,k) & 
+                        if ( q(i,j,k) < 0.5_8 ) then
+                            temparray(inew,jnew,knew) = ( q(i,j,k)*(1._8+2._8*q(i,j,k))*dataarray(i,j,k) & 
                             + (1._8-4._8*q(i,j,k)**2)*dataarray(i1,j2,k) - q(i,j,k)*(1._8-2._8*q(i,j,k))*dataarray(i2,j2,k) )
-                        if ( q(i,j,k) > 0.5_8 ) temparray(inew,jnew,knew) = ( 1._8/(q(i,j,k)*(2*q(i,j,k)+1))*dataarray(i,j,k) &
+                            print *, "hit<0.5"
+                        end if
+                        if ( q(i,j,k) > 0.5_8 ) then
+                            temparray(inew,jnew,knew) = ( 1._8/(q(i,j,k)*(2*q(i,j,k)+1))*dataarray(i,j,k) &
                             + (2._8*q(i,j,k)-1)/q(i,j,k)*temparray(i1,j1,knew) - (2*q(i,j,k)-1._8)/(2*q(i,j,k)+1) & 
                             *temparray(i2,j2,knew) )
+                            print *, "hit>0.5"
+                        end if
                     end if                    
                 end do
             end do
@@ -121,7 +128,12 @@ contains
         
         call calculate_vel(V2, temparray, x, y)
 
-        DV=V1-V2
+        DV(3:y-2,3:x-2,:)=V2(3:y-2,3:x-2,:)-V1(3:y-2,3:x-2,:)
+
+        Print *, "DVx"
+        call disp(DV(:,:,1))
+             Print *, "DVy"
+        call disp(DV(:,:,2))
         dataarray=temparray
 
     end subroutine movedensity
