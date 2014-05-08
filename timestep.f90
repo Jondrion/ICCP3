@@ -1,9 +1,9 @@
-subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_object, n_vertices, velocities)
+subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_object, n_vertices, V_object, M_object,velocities)
     
     use dispmodule
     integer, intent(in) :: x,y, n_vertices
-    real(8), intent(in) :: pressure_grad, relaxtime
-    real(8), intent(inout) :: dataarray(y,x,7)
+    real(8), intent(in) :: pressure_grad, relaxtime, M_object
+    real(8), intent(inout) :: dataarray(y,x,7), V_object(2)
     real(8), intent(out) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x), q(y,x,7)
     real(8), intent(inout) :: X_object(n_vertices,2)
@@ -38,7 +38,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
     CoM=0
-    call moveobject(X_object, n_vertices, DV,x,y,CoM)
+    call moveobject(X_object, n_vertices,V_object,M_object, DV,x,y,CoM)
 
     
 
@@ -121,7 +121,7 @@ contains
         
         call calculate_vel(V2, temparray, x, y)
 
-        DV=V2-V1
+        DV=V1-V2
         dataarray=temparray
 
     end subroutine movedensity
@@ -175,10 +175,10 @@ contains
         
     end subroutine relax_density
 
-    subroutine moveobject(X_object, n_vertices, DV,x,y,CoM)
+    subroutine moveobject(X_object, n_vertices, V_object, M_object, DV,x,y,CoM)
         integer, intent(in) :: n_vertices, x, y
-        real(8), intent(in) :: DV(y,x,2), CoM(2)
-        real(8), intent(inout) :: X_object(n_vertices,2)
+        real(8), intent(in) :: DV(y,x,2), CoM(2), M_object
+        real(8), intent(inout) :: X_object(n_vertices,2), V_object(2)
         real(8) :: X_nodes(y,x,2), Ftotal(2), M
         integer :: i,j
 
@@ -186,8 +186,10 @@ contains
 
             M=100
 
-            X_object(:,1)=X_object(:,1)+Ftotal(1)/M
-            X_object(:,2)=X_object(:,2)+Ftotal(2)/M
+            V_object=V_object+Ftotal/M_object
+
+            X_object(:,1)=X_object(:,1)+V_object(1)
+            X_object(:,2)=X_object(:,2)+V_object(2)
 
 
         do i=1,x            
