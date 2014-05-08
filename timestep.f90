@@ -8,6 +8,8 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     real(8) :: equildensity(y,x,7), totaldensity(y,x), q(y,x,7)
     real(8), intent(inout) :: X_object(n_vertices,2)
     integer :: mask(y,x), Object(y,x)
+    real(8) :: DV(y,x,2), CoM(2)
+    
 
     !-- temporary code
     !-- make mask for boundaries: array of all nodes which is 0 for internal and 3 for external points
@@ -19,12 +21,13 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     !-- cube in centre
 !     mask(14:15,10:12)=3
 !     mask(7:27,20:22)=3
+ 
 
     call polygon(X_object,4,Object,x,y,q)
 
     mask(2:y-1,:)=Object(2:y-1,:)
 
-    call movedensity(dataarray, mask, x, y, q)
+    call movedensity(dataarray, DV, mask, x, y, q)
 
     call calculate_vel(velocities, dataarray, x, y)
 
@@ -34,17 +37,24 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
-!     X_object(:,1)=X_object(:,1)+0.1
+    CoM=0
+    call moveobject(X_object, n_vertices, DV,x,y,CoM)
+
+    
+
+
 
 
 contains
 
-    subroutine movedensity(dataarray,mask,x,y,q)
+    subroutine movedensity(dataarray, DV, mask,x,y,q)
         integer, intent(in) :: x,y, mask(y,x)
         real(8), intent(inout) :: dataarray(y,x,7)
         real(8), intent(in) :: q(y,x,7)
         real(8) :: temparray(y,x,7)
         integer :: i,j,k, e_ik(2,7), e_jk(2,7), inew, jnew, knew, i1, i2, j1, j2
+        real(8) :: V1(y,x,2), V2(y,x,2)
+        real(8), intent(out) :: DV(y,x,2)
 
         temparray=0
 
@@ -78,6 +88,8 @@ contains
             end do
         end do
 
+        call calculate_vel(V1, temparray, x, y)
+
         do j=1,x
             do i=1,y
                 do k=2,7
@@ -102,11 +114,14 @@ contains
                         if ( q(i,j,k) > 0.5_8 ) temparray(inew,jnew,knew) = ( 1._8/(q(i,j,k)*(2*q(i,j,k)+1))*dataarray(i,j,k) &
                             + (2._8*q(i,j,k)-1)/q(i,j,k)*temparray(i1,j1,knew) - (2*q(i,j,k)-1._8)/(2*q(i,j,k)+1) & 
                             *temparray(i2,j2,knew) )
-                    end if
+                    end if                    
                 end do
             end do
         end do
         
+        call calculate_vel(V2, temparray, x, y)
+
+        DV=V2-V1
         dataarray=temparray
 
     end subroutine movedensity
@@ -159,6 +174,34 @@ contains
         end do
         
     end subroutine relax_density
+
+    subroutine moveobject(X_object, n_vertices, DV,x,y,CoM)
+        integer, intent(in) :: n_vertices, x, y
+        real(8), intent(in) :: DV(y,x,2), CoM(2)
+        real(8), intent(inout) :: X_object(n_vertices,2)
+        real(8) :: X_nodes(y,x,2), Ftotal(2), M
+        integer :: i,j
+
+            Ftotal=sum(sum(DV,1),1)
+
+            M=100
+
+            X_object(:,1)=X_object(:,1)+Ftotal(1)/M
+            X_object(:,2)=X_object(:,2)+Ftotal(2)/M
+
+
+        do i=1,x            
+            do j=1,y
+                if (DV(j,i,1)/=0 .or. DV(j,i,2)/=0) then
+                    X_nodes(j,i,1) = i+modulo(j+1,2)*0.5
+                    X_nodes(j,i,2) = j*(sqrt(3._8)/2)
+                end if              
+            end do
+        end do
+
+    end subroutine moveobject
+
+        
 
 
 end subroutine timestep

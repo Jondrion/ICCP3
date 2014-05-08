@@ -38,24 +38,20 @@ program Boltz
 !     print *,'initial distribution: '
 !     call disp(sum(gridarray,3))
 
-    X_object(1,:)=[20._8,10._8]
-    X_object(2,:)=[22._8,10._8]
-    X_object(3,:)=[22._8,20._8]
-    X_object(4,:)=[20._8,20._8]
+    X_object(1,:)=[1.5_8,3._8/2._8*sqrt(3._8)+10.5_8]
+    X_object(2,:)=[3.5_8,3._8/2._8*sqrt(3._8)+10.5_8]
+    X_object(3,:)=[3.5_8,3._8/2._8*sqrt(3._8)+13.5_8]
+    X_object(4,:)=[1.5_8,3._8/2._8*sqrt(3._8)+13.5_8]
 
 
-    do i = 1, 300
+    do i = 1, 3000
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, X_object, n_vertices, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray), &
         "velox", minval(velocities(:,:,1)), "veloy", minval(velocities(:,:,2))
       call plot_points(velocities, n_x, n_y, X_object, n_vertices)
     end do
     
-!     print *,'velocity x: '
-!     call disp(velocities(:,:,1))
-!     print *,'velocity y: '
-!     call disp(velocities(:,:,2))
-
+     
 end program
 
 
