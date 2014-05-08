@@ -1,6 +1,6 @@
 
 
-subroutine polygon(X_object,np,Object,x,y)
+subroutine polygon(X_object,np,Object,x,y,q)
     use dispmodule
     implicit none
     integer, intent(in) :: np,x,y
@@ -8,7 +8,8 @@ subroutine polygon(X_object,np,Object,x,y)
     real(8) :: X_nodes(y,x,2), Crosspoint(2)
     integer, intent(out) :: Object(y,x)
     integer :: boolean, i, j, k, l, xx, yy, e_ik(2,7), e_jk(2,7), inew, jnew
-    real(8) :: q(y,x,7), q_vec(2)
+    real(8), intent(out) :: q(y,x,7)
+    real(8) :: q_vec(2)
 
 
     do i=1,x
@@ -42,8 +43,8 @@ subroutine polygon(X_object,np,Object,x,y)
 
     Object=(-3)*(Object-1)
 
-     print *, "Object"
-     call disp(Object)
+!      print *, "Object"
+!      call disp(Object)
 
         e_ik(1,:)=[0,0,-1,-1,0,1,1]
         e_jk(1,:)=[0,1,1,0,-1,0,1]

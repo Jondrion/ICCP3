@@ -38,10 +38,10 @@ program Boltz
 !     print *,'initial distribution: '
 !     call disp(sum(gridarray,3))
 
-    X_object(1,:)=[1.5_8,3._8/2._8*sqrt(3._8)-0.5_8]
-    X_object(2,:)=[3.5_8,3._8/2._8*sqrt(3._8)-0.5_8]
-    X_object(3,:)=[3.5_8,3._8/2._8*sqrt(3._8)+3.5_8]
-    X_object(4,:)=[1.5_8,3._8/2._8*sqrt(3._8)+3.5_8]
+    X_object(1,:)=[20._8,10._8]
+    X_object(2,:)=[22._8,10._8]
+    X_object(3,:)=[22._8,20._8]
+    X_object(4,:)=[20._8,20._8]
 
 
     do i = 1, 300

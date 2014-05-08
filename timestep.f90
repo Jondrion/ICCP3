@@ -5,7 +5,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     real(8), intent(in) :: pressure_grad, relaxtime
     real(8), intent(inout) :: dataarray(y,x,7)
     real(8), intent(out) :: velocities(y,x,2)
-    real(8) :: equildensity(y,x,7), totaldensity(y,x)
+    real(8) :: equildensity(y,x,7), totaldensity(y,x), q(y,x,7)
     real(8), intent(inout) :: X_object(n_vertices,2)
     integer :: mask(y,x), Object(y,x)
 
@@ -20,11 +20,11 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 !     mask(14:15,10:12)=3
 !     mask(7:27,20:22)=3
 
-    call polygon(X_object,4,Object,x,y)
+    call polygon(X_object,4,Object,x,y,q)
 
     mask(2:y-1,:)=Object(2:y-1,:)
 
-    call movedensity(dataarray, mask, x, y)
+    call movedensity(dataarray, mask, x, y, q)
 
     call calculate_vel(velocities, dataarray, x, y)
 
@@ -34,14 +34,17 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
+!     X_object(:,1)=X_object(:,1)+0.1
+
 
 contains
 
-    subroutine movedensity(dataarray,mask,x,y)
+    subroutine movedensity(dataarray,mask,x,y,q)
         integer, intent(in) :: x,y, mask(y,x)
         real(8), intent(inout) :: dataarray(y,x,7)
+        real(8), intent(in) :: q(y,x,7)
         real(8) :: temparray(y,x,7)
-        integer :: i,j,k, e_ik(2,7), e_jk(2,7), inew, jnew, knew
+        integer :: i,j,k, e_ik(2,7), e_jk(2,7), inew, jnew, knew, i1, i2, j1, j2
 
         temparray=0
 
@@ -68,9 +71,38 @@ contains
                     end if
 
                     !-- only move densities in direction of domain
-                     if ( mask(i,j) == 0 ) then
+                     if ( mask(i,j) == 0 .and. mask(inew,jnew) == 0 ) then
                         temparray(inew,jnew,knew)=dataarray(i,j,k)
                      end if
+                end do
+            end do
+        end do
+
+        do j=1,x
+            do i=1,y
+                do k=2,7
+                    inew=i+e_ik(1+modulo(i,2),k)
+                    !-- periodic bc in x-direction
+                    jnew=modulo((j+e_jk(1+modulo(i,2),k)-1),x)+1
+                    !-- reverse direction if at boundary point
+                    knew=modulo((k-2+mask(inew,jnew)),6)+2
+
+                    !-- do bounce-back in one time step and use interpolation
+                    if ( mask(inew,jnew) == 3 ) then
+                        inew=i
+                        jnew=j
+                        !-- calculate location of two interpolation neighbours
+                        i1=i+e_ik(1+modulo(i,2),knew)
+                        j1=modulo((j+e_jk(1+modulo(i,2),knew)-1),x)+1
+                        i2=i1+e_ik(1+modulo(i1,2),knew)
+                        j2=modulo((j1+e_jk(1+modulo(i1,2),knew)-1),x)+1
+                        !-- different interpolation depending on q
+                        if ( q(i,j,k) < 0.5_8 ) temparray(inew,jnew,knew) = ( q(i,j,k)*(1._8+2._8*q(i,j,k))*dataarray(i,j,k) & 
+                            + (1._8-4._8*q(i,j,k)**2)*dataarray(i1,j2,k) - q(i,j,k)*(1._8-2._8*q(i,j,k))*dataarray(i2,j2,k) )
+                        if ( q(i,j,k) > 0.5_8 ) temparray(inew,jnew,knew) = ( 1._8/(q(i,j,k)*(2*q(i,j,k)+1))*dataarray(i,j,k) &
+                            + (2._8*q(i,j,k)-1)/q(i,j,k)*temparray(i1,j1,knew) - (2*q(i,j,k)-1._8)/(2*q(i,j,k)+1) & 
+                            *temparray(i2,j2,knew) )
+                    end if
                 end do
             end do
         end do
