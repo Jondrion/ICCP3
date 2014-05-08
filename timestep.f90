@@ -140,8 +140,8 @@ contains
                 end do
             end do
         end do
-        print *,"Q"
-        call disp(sum(q,3))
+!         print *,"Q"
+!         call disp(sum(q,3))
 
 
         !Print *, "DVx"
@@ -206,7 +206,7 @@ contains
         integer, intent(in) :: n_vertices, x, y
         real(8), intent(in) :: DV(y,x,2), M_object
         real(8), intent(inout) :: X_object(n_vertices,2), V_object(2),CoM(2), alpha_object
-        real(8) :: X_nodes(y,x,2), Ftotal(2),R(2), I_object, Torq
+        real(8) :: X_nodes(y,x,2), Ftotal(2),R(2), I_object, Torq, RM(2,2)
         integer :: i,j
 
             Ftotal=sum(sum(DV,1),1)
@@ -232,11 +232,24 @@ contains
                 end if              
             end do
         end do
-        I_object=100
+        I_object=500
         alpha_object=alpha_object+Torq/I_object
 
-       X_object(:,1)=(X_object(:,1)-CoM(1))*cos(alpha_object)-(X_object(:,2)-CoM(2))*sin(alpha_object)+CoM(1)
-       X_object(:,2)=(X_object(:,1)-CoM(1))*sin(alpha_object)+(X_object(:,2)-CoM(2))*cos(alpha_object)+CoM(2)
+        RM(:,1)=[cos(-alpha_object), sin(-alpha_object)]
+        RM(:,2)=[-sin(-alpha_object),cos(-alpha_object)]
+
+        do i = 1, n_vertices
+            X_object(i,:)=X_object(i,:)-CoM
+            X_object(i,:)=matmul(X_object(i,:),RM)
+            X_object(i,:)=X_object(i,:)+CoM
+        end do
+
+
+
+        print *,'alpha_object = ', alpha_object
+
+!         X_object(:,1)=(X_object(:,1)-CoM(1))*cos(alpha_object)-(X_object(:,2)-CoM(2))*sin(alpha_object)+CoM(1)
+!         X_object(:,2)=(X_object(:,1)-CoM(1))*sin(alpha_object)+(X_object(:,2)-CoM(2))*cos(alpha_object)+CoM(2)
 
     end subroutine moveobject
 
