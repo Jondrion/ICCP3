@@ -11,8 +11,8 @@ subroutine make_object(n_vertices, CoM, object_size, offset, X_object)
 
 
     do i=1, n_vertices
-        X_object(i,1)=CoM(1)+object_size*cos(2*Pi*dble(i)/dble(n_vertices))
-        X_object(i,2)=CoM(2)+object_size*sin(2*Pi*dble(i)/dble(n_vertices))
+        X_object(i,1)=CoM(1)+object_size*cos(2*Pi*dble(i)/dble(n_vertices)+Pi/4._8)
+        X_object(i,2)=CoM(2)+object_size*sin(2*Pi*dble(i)/dble(n_vertices)+Pi/4._8)
     end do
 
     CoM=CoM+offset
