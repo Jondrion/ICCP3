@@ -35,11 +35,11 @@ subroutine plot_init()
 
 end subroutine plot_init
 
-subroutine plot_points(vector, x, y, X_object, n_vertices)
+subroutine plot_points(vector, x, y, X_object, n_vertices, CoM)
 
 use dispmodule
     integer, intent(in) :: x,y, n_vertices
-    real(kind=plflt), intent(in) :: vector(y,x,2), X_object(n_vertices,2)
+    real(kind=plflt), intent(in) :: vector(y,x,2), X_object(n_vertices,2), CoM(2)
     real(8) :: xx, yy
     real(kind=plflt) xmin, xmax, ymin, ymax;
     real(kind=plflt) xg(y,x),yg(y,x),line(x)
@@ -72,7 +72,7 @@ use dispmodule
     !call plclear()
 
     call plcol0(7)
-    call plenv(xmin, xmax, ymin, ymax, 0, 0)
+    call plenv(xmin, xmax, ymin, ymax, 1, 0)
     call PLshades(vector(2:y-1,:,1), defined, xmin, xmax, ymin, ymax, clev,1, 1, 0,xg(2:y-1,:),yg(2:y-1,:)) 
 
     call plcol0(3)
@@ -83,6 +83,8 @@ use dispmodule
     !call plline(xg(1,:),line-y+2)
 
     call plfill( X_object(:,1), X_object(:,2) )
+    call plcol0(1)
+    call plpoin([CoM(1),CoM(1)],[CoM(2),CoM(2)],3)
 
 
     

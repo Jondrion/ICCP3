@@ -49,12 +49,12 @@ program Boltz
     alpha_object=0
 
 
-    do i = 1, 200
+    do i = 1, 4
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, &
         X_object, n_vertices, V_object, M_object, CoM,alpha_object, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray), &
         "velox", minval(velocities(:,:,1)), "veloy", minval(velocities(:,:,2))
-      call plot_points(velocities, n_x, n_y, X_object, n_vertices)
+      call plot_points(velocities, n_x, n_y, X_object, n_vertices, CoM)
     end do
     
      
