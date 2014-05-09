@@ -4,7 +4,8 @@ program Boltz
     use PLplot3D
 
     implicit none
-    real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad, V_object(2), M_object, CoM(2), alpha_object
+    real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad, V_object(2), M_object, &
+        CoM(2), alpha_object, object_size, offset(2)
     real(8), allocatable :: gridarray(:,:,:), velocities(:,:,:), rho(:,:), X_object(:,:)
     integer :: gridtype, n_y, n_x, i, n_vertices
     
@@ -38,10 +39,11 @@ program Boltz
 !     print *,'initial distribution: '
 !     call disp(sum(gridarray,3))
 
-    X_object(1,:)=[2.5_8,10.8253-3._8]
-    X_object(2,:)=[8.5_8,10.8253-3._8]
-    X_object(3,:)=[8.5_8,10.8253+3._8]
-    X_object(4,:)=[2.5_8,10.8253+3._8]
+
+    !X_object(1,:)=[1.5_8,3._8/2._8*sqrt(3._8)+5.5_8]
+    !X_object(2,:)=[3.5_8,3._8/2._8*sqrt(3._8)+5.5_8]
+    !X_object(3,:)=[3.5_8,3._8/2._8*sqrt(3._8)+10.5_8]
+    !X_object(4,:)=[1.5_8,3._8/2._8*sqrt(3._8)+10.5_8]
 !     X_object(1,:)=[0._8,0._8]
 !     X_object(2,:)=[0._8,0._8]
 !     X_object(3,:)=[0._8,0._8]
@@ -49,11 +51,15 @@ program Boltz
     V_object=0
     M_object=200
     CoM(1)=2.5_8
-    CoM(2)=3._8/2._8*sqrt(3._8)+8._8
+    CoM(2)=3._8/2._8*sqrt(3._8)+18._8
     alpha_object=0
+    object_size=3._8
+    offset=[0._8,1._8]
+
+    call make_object(n_vertices, CoM, object_size, offset, X_object)
 
 
-    do i = 1, 300
+    do i = 1, 400
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, &
         X_object, n_vertices, V_object, M_object, CoM,alpha_object, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray), &
