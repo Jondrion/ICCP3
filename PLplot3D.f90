@@ -84,7 +84,7 @@ use dispmodule
 
     call plfill( X_object(:,1), X_object(:,2) )
     call plcol0(1)
-    call plpoin([CoM(1),CoM(1)],[CoM(2),CoM(2)],3)
+    call plpoin([CoM(1),CoM(1)],[CoM(2),CoM(2)],1)
 
 
     

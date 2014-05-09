@@ -25,7 +25,7 @@ program Boltz
     gridarray=0
 
 !-- Initialise X_object
-    n_vertices=14
+    n_vertices=4
     allocate(X_object(n_vertices,2))
 
 !-- Calculate intial density distribution (given certain mean velocity)
@@ -48,16 +48,17 @@ program Boltz
 !     X_object(2,:)=[0._8,0._8]
 !     X_object(3,:)=[0._8,0._8]
 !     X_object(4,:)=[0._8,0._8]
-    V_object=0
+    V_object(1)=-0.4
+    V_object(2)=0
     M_object=100
-    I_object=1000
+    I_object=3000
 
-    CoM(1)=2.5_8
+    CoM(1)=20.5_8
     CoM(2)=3._8/2._8*sqrt(3._8)+18._8
 
     alpha_object=0
     object_size=3._8
-    offset=[0._8,1._8]
+    offset=[0._8,0._8]
 
     call make_object(n_vertices, CoM, object_size, offset, X_object)
 
