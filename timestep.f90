@@ -1,10 +1,10 @@
 subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_object, n_vertices, V_object, &
-    M_object, CoM, alpha_object, velocities)
+    M_object, I_object, CoM, alpha_object, velocities)
     
     use dispmodule
     implicit none
     integer, intent(in) :: x,y, n_vertices
-    real(8), intent(in) :: pressure_grad, relaxtime, M_object
+    real(8), intent(in) :: pressure_grad, relaxtime, M_object, I_object
     real(8), intent(inout) :: dataarray(y,x,7), V_object(2), CoM(2)
     real(8), intent(out) :: velocities(y,x,2)
     real(8) :: equildensity(y,x,7), totaldensity(y,x), q(y,x,7)
@@ -25,7 +25,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 !     mask(7:27,20:22)=3
  
 
-    call polygon(X_object,4,Object,x,y,q)
+    call polygon(X_object,n_vertices,Object,x,y,q)
 
     mask(2:y-1,:)=Object(2:y-1,:)
 
@@ -40,7 +40,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
     
-    call moveobject(X_object, n_vertices,V_object,M_object, DV,x,y,CoM, alpha_object)
+    call moveobject(X_object, n_vertices,V_object,M_object, I_object, DV,x,y,CoM, alpha_object)
 
     
 
@@ -202,11 +202,11 @@ contains
         
     end subroutine relax_density
 
-    subroutine moveobject(X_object, n_vertices, V_object, M_object, DV,x,y,CoM, alpha_object)
+    subroutine moveobject(X_object, n_vertices, V_object, M_object, I_object, DV,x,y,CoM, alpha_object)
         integer, intent(in) :: n_vertices, x, y
-        real(8), intent(in) :: DV(y,x,2), M_object
+        real(8), intent(in) :: DV(y,x,2), M_object, I_object
         real(8), intent(inout) :: X_object(n_vertices,2), V_object(2),CoM(2), alpha_object
-        real(8) :: X_nodes(y,x,2), Ftotal(2),R(2), I_object, Torq, RM(2,2)
+        real(8) :: X_nodes(y,x,2), Ftotal(2),R(2), Torq, RM(2,2)
         integer :: i,j
 
             Ftotal=sum(sum(DV,1),1)
@@ -232,7 +232,7 @@ contains
                 end if              
             end do
         end do
-        I_object=500
+        
         alpha_object=alpha_object+Torq/I_object
 
         RM(:,1)=[cos(-alpha_object), sin(-alpha_object)]
