@@ -23,7 +23,7 @@ subroutine polygon(X_object,np,Object,x,y,q)
 !     print *, "X_object"
 !     call disp(X_object)
 !     print *, "nodes"
-!     call disp(X_nodes(:,:,1))
+!     call disp(X_nodes(:,:,2))
 
 
     Object=0
