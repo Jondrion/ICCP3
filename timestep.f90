@@ -43,7 +43,9 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     call moveobject(X_object, n_vertices,V_object,M_object, I_object, DV,x,y,CoM, alpha_object)
 
     
+    call polygon(X_object,n_vertices,Object,x,y,q)
 
+    call updatefluidpoints(dataarray,mask,Object,V_object,totaldensity,x,y)
 
 
 
@@ -246,14 +248,41 @@ contains
 
 
 
-        print *,'alpha_object = ', alpha_object
+        !print *,'alpha_object = ', alpha_object
 
 !         X_object(:,1)=(X_object(:,1)-CoM(1))*cos(alpha_object)-(X_object(:,2)-CoM(2))*sin(alpha_object)+CoM(1)
 !         X_object(:,2)=(X_object(:,1)-CoM(1))*sin(alpha_object)+(X_object(:,2)-CoM(2))*cos(alpha_object)+CoM(2)
 
     end subroutine moveobject
 
+    !-- check if some wall points become fluid points and vice versa
+    !-- idea: compare old mask with new mask
+    subroutine updatefluidpoints(dataarray,mask,Object,V_object,totaldensity,x,y)
+        integer :: x,y
+        real(8), intent(inout) :: dataarray(y,x,7)
+        real(8), intent(in) :: totaldensity(y,x), V_object(2)
+        integer, intent(in) :: mask(y,x), Object(y,x)
+        integer :: diff(y,x), i, j
+
+        diff = mask - Object
+!         print *, 'diff: '
+!         call disp(diff)
+
+        do i = 1, x
+            do j = 2, y-1
+                !-- new fluid point
+                if ( diff(j,i) == 3 ) then 
+                    call calculate_equildensity(dataarray(j,i,:),totaldensity,V_object,1,1)
+                    !print *,'new fluid point!'
+                end if
+                if (diff (j,i) == -3) then
+                    dataarray(j,i,:)=0._8
+                    !print *,'new wall point!'
+                end if
+            end do
+        end do
         
+    end subroutine updatefluidpoints
 
 
 end subroutine timestep

@@ -48,13 +48,13 @@ program Boltz
 !     X_object(2,:)=[0._8,0._8]
 !     X_object(3,:)=[0._8,0._8]
 !     X_object(4,:)=[0._8,0._8]
-    V_object(1)=-0.4
+    V_object(1)=0
     V_object(2)=0
-    M_object=100
+    M_object=200
     I_object=3000
 
-    CoM(1)=20.5_8
-    CoM(2)=3._8/2._8*sqrt(3._8)+18._8
+    CoM(1)=10.5_8
+    CoM(2)=3._8/2._8*sqrt(3._8)+13.0_8
 
     alpha_object=0
     object_size=3._8
