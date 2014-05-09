@@ -43,8 +43,8 @@ subroutine polygon(X_object,np,Object,x,y,q)
 
     Object=(-3)*(Object-1)
 
-      !print *, "Object"
-      !call disp(Object)
+      print *, "Object"
+      call disp(Object)
 
         e_ik(1,:)=[0,0,-1,-1,0,1,1]
         e_jk(1,:)=[0,1,1,0,-1,0,1]
@@ -89,6 +89,7 @@ contains
         real(8), intent(in) :: x1(2),x2(2),X(2)
         integer, intent(inout) :: boolean
         real(8) :: functionvalue, Diff(2)
+        real(8) :: dydx
 
         Diff=x2-x1
 
@@ -96,20 +97,23 @@ contains
             return
         end if
 
+        dydx=(x2(2)-x1(2))/(x2(1)-x1(1))
+               
         
-        
-        if (DIFF(2)==0) then
+        if (dydx<1 .and. dydx>-1) then
             functionvalue=(x2(2)-x1(2))/(x2(1)-x1(1))*(X(1)-x1(1))+x1(2)
-            if(SIGN(X(2),Diff(1))>SIGN(functionvalue,Diff(1))) then
+            if(SIGN(X(2),Diff(1))>=SIGN(functionvalue,Diff(1))) then
                 boolean=0
+               ! print *, "hit1", X 
 
             else
                 boolean=1                
             end if
         else
             functionvalue=(x2(1)-x1(1))/(x2(2)-x1(2))*(X(2)-x1(2))+x1(1)
-            if(SIGN(X(1),Diff(2))<SIGN(functionvalue,Diff(2))) then
+            if(SIGN(X(1),Diff(2))<=SIGN(functionvalue,Diff(2))) then
                 boolean=0
+                !print *, "hit2", X 
             else
                 boolean=1              
             end if
