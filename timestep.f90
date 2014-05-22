@@ -39,7 +39,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
-    call moveobject(X_object, n_vertices,V_object,M_object, DV,x,y,CoM, alpha_object)
+    call moveobject(X_object, n_vertices,V_object,M_object,I_object, DV,x,y,CoM, alpha_object)
 
     
     call polygon(X_object,n_vertices,Object,x,y,q)
