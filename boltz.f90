@@ -5,7 +5,7 @@ program Boltz
 
     implicit none
     real(8) :: relaxtime, tubewidth, tubelength, gridsize, pressure, pressure_grad, V_object(2), M_object, &
-        CoM(2), alpha_object, object_size, offset(2)
+        CoM(2), I_object, alpha_object, object_size, offset(2)
     real(8), allocatable :: gridarray(:,:,:), velocities(:,:,:), rho(:,:), X_object(:,:)
     integer :: gridtype, n_y, n_x, i, n_vertices
     
@@ -48,20 +48,24 @@ program Boltz
 !     X_object(2,:)=[0._8,0._8]
 !     X_object(3,:)=[0._8,0._8]
 !     X_object(4,:)=[0._8,0._8]
-    V_object=0
-    M_object=200
-    CoM(1)=2.5_8
+    V_object(1)=-0.4
+    V_object(2)=0
+    M_object=100
+    I_object=3000
+
+    CoM(1)=20.5_8
     CoM(2)=3._8/2._8*sqrt(3._8)+18._8
+
     alpha_object=0
     object_size=3._8
-    offset=[0._8,1._8]
+    offset=[0._8,0._8]
 
     call make_object(n_vertices, CoM, object_size, offset, X_object)
 
 
     do i = 1, 400
       call timestep(gridarray, n_x, n_y, pressure_grad, relaxtime, rho, &
-        X_object, n_vertices, V_object, M_object, CoM,alpha_object, velocities)
+        X_object, n_vertices, V_object, M_object, I_object, CoM,alpha_object, velocities)
       print *,"after timestep ", i, " total density: ", sum(gridarray), &
         "velox", minval(velocities(:,:,1)), "veloy", minval(velocities(:,:,2))
       call plot_points(velocities, n_x, n_y, X_object, n_vertices, CoM)

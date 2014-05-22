@@ -1,6 +1,11 @@
 3 relaxtime
+<<<<<<< HEAD
 20 tubewidth
 50 tubelength
+=======
+30 tubewidth
+60 tubelength
+>>>>>>> e27f22b6691d16b5ab69c78b30c0d5ca7cd9b226
 1 gridsize
 7 gridtype
 0.1 pressure
