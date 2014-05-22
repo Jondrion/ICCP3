@@ -41,12 +41,12 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 
     call moveobject(X_object, n_vertices,V_object,M_object, DV,x,y,CoM, alpha_object)
 
+    
     call polygon(X_object,n_vertices,Object,x,y,q)
-!     print *,'X_object after: '
-!     call disp(X_object)
-!     print *, 'Object: '
-!     call disp(Object)
+
     call updatefluidpoints(dataarray,mask,Object,V_object,totaldensity,x,y)
+
+
 
 contains
 
