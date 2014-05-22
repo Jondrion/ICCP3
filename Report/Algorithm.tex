@@ -1,1 +1,13 @@
-This is the algorithm.
+The algorithm steps are as follows:
+\begin{multicols}{2}
+\begin{enumerate}
+    \item Move density $n_i$ to the approporiate neighbour
+    \item Handle boundary conditions correctly (bounce-back / periodic)
+    \item Calculate velocities at each point (Cartesian components)
+    \item Add effect of pressure gradient
+    \item Calculate equilibrium density distribution at each point
+    \item Relax the densities of fluid points
+    \item Move the solid object
+    \item Update wall points and fluid points
+\end{enumerate}
+\end{multicols}
