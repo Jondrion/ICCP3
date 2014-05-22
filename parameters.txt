@@ -1,10 +1,6 @@
 3 relaxtime
 30 tubewidth
-<<<<<<< Updated upstream
-40 tubelength
-=======
 50 tubelength
->>>>>>> Stashed changes
 1 gridsize
 7 gridtype
 0.3 pressure
