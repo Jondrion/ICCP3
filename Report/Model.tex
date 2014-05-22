@@ -1,0 +1,5 @@
+It is not the aim of this report to explain the lattice boltzmann model in detail, rather this section will briefly discuss its main features. Key feature of the lattice boltzmann model is that it limits the microscopic details. Particles are placed on fixed lattice sites and can only move to neighbouring sites. The particles interact in the form of collisions and a relaxation effect is introduced. Note that both space and time are treated as discrete. The `particles` however are replaced by densities of the fluid. The boltzmann equation reads:
+
+\begin{equation}
+    \frac{\partial n}{\partial t} + \mathbf{v} \cdot \nabla_{\mathbf{r}} n = \left( \frac{\mathrm{d}n}{\mathrm{d}t} \right )_{collisions}
+\end{equation} 

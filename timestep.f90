@@ -16,6 +16,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     !-- temporary code
     !-- make mask for boundaries: array of all nodes which is 0 for internal and 3 for external points
     mask=0
+    Object=0
     mask(1,:)=3
 !     mask(:,1)=3
     mask(y,:)=3
@@ -23,7 +24,6 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
     !-- cube in centre
 !     mask(14:15,10:12)=3
 !     mask(7:27,20:22)=3
- 
 
     call polygon(X_object,n_vertices,Object,x,y,q)
 
@@ -39,8 +39,7 @@ subroutine timestep(dataarray, x, y, pressure_grad, relaxtime, totaldensity, X_o
 
     call relax_density(dataarray,equildensity,mask,x,y,relaxtime)
 
-    
-    call moveobject(X_object, n_vertices,V_object,M_object, I_object, DV,x,y,CoM, alpha_object)
+    call moveobject(X_object, n_vertices,V_object,M_object,I_object, DV,x,y,CoM, alpha_object)
 
     
     call polygon(X_object,n_vertices,Object,x,y,q)
@@ -60,8 +59,8 @@ contains
         real(8) :: V1(y,x,2), v2(2)
         real(8), intent(out) :: DV(y,x,2)
 
-        temparray=0
-        DV=0
+        temparray=0._8
+        DV=0._8
 
         !-- directions:
         e_ik(1,:)=[0,0,-1,-1,0,1,1]
@@ -221,8 +220,8 @@ contains
             X_object(:,2)=X_object(:,2)+V_object(2)
             CoM=CoM+V_object
 
-            R=0
-            Torq=0
+            R=0._8
+            Torq=0._8
         do i=1,x            
             do j=1,y
                 if (DV(j,i,1)/=0 .or. DV(j,i,2)/=0) then
@@ -246,13 +245,6 @@ contains
             X_object(i,:)=X_object(i,:)+CoM
         end do
 
-
-
-        !print *,'alpha_object = ', alpha_object
-
-!         X_object(:,1)=(X_object(:,1)-CoM(1))*cos(alpha_object)-(X_object(:,2)-CoM(2))*sin(alpha_object)+CoM(1)
-!         X_object(:,2)=(X_object(:,1)-CoM(1))*sin(alpha_object)+(X_object(:,2)-CoM(2))*cos(alpha_object)+CoM(2)
-
     end subroutine moveobject
 
     !-- check if some wall points become fluid points and vice versa
@@ -273,16 +265,18 @@ contains
                 !-- new fluid point
                 if ( diff(j,i) == 3 ) then 
                     call calculate_equildensity(dataarray(j,i,:),totaldensity,V_object,1,1)
-                    !print *,'new fluid point!'
+                    print *,'new fluid point!'
                 end if
                 if (diff (j,i) == -3) then
                     dataarray(j,i,:)=0._8
-                    !print *,'new wall point!'
+                    print *,'new wall point!'
                 end if
             end do
         end do
         
     end subroutine updatefluidpoints
+
+        
 
 
 end subroutine timestep
